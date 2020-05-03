@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+import os
 
 bot = commands.Bot(command_prefix="$")
 
@@ -8,20 +9,27 @@ async def on_ready():
     print(f"We have logged in as: {bot.user}")
 
 @bot.command()
-async def kick(ctx, member: discord.Member, *, reason=None):
-    await member.kick(reason=reason)
+async def load(ctx, extension):
+    bot.load_extension(f"cogs.{extension}")
+    await ctx.send(f"Lodaded Cog: {extension}")
+    print(f"Loaded Cog: {extension}")
 
 @bot.command()
-async def ping(ctx):
-    await ctx.send(":ping_pong: Pong!")
+async def unload(ctx, extension):
+    bot.unload_extension(f"cogs.{extension}")
+    await ctx.send(f"Unloaded Cog: {extension}")
+    print(f"Unloaded Cog: {extension}")
 
 @bot.command()
-async def addpoints(ctx, user, points):
-    await ctx.send("Updated {0}'s ponts: added {1}".format(user, points))
+async def reload(ctx, extension):
+    bot.unload_extension(f"cogs.{extension}")
+    bot.load_extension(f"cogs.{extension}")
+    await ctx.send(f"Reloaded Cog: {extension}")
+    print(f"Reloaded Cog: {extension}")
 
-@bot.command()
-async def printconsole(ctx, *args):
-    print('{} arguments: {}'.format(len(args), ', '.join(args)))
+for filename in os.listdir("./cogs"):
+    if filename.endswith(".py"):
+        bot.load_extension(f"cogs.{filename[:-3]}")
 
 @bot.command()
 async def shutdown(ctx):
