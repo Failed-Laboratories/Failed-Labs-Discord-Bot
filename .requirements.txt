@@ -1,2 +1,3 @@
 discord
 boto3
+dotenv
