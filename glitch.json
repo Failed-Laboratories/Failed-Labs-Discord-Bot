@@ -1,0 +1,14 @@
+{
+    "install": "sh ./installReqsAndStart.sh",
+    "start": "bash installReqsAndStart.sh",
+    "watch": {
+      "install": {
+        "include": ["^glitch\\.json$", "^\\.env$"]
+      },
+      "restart": {
+        "exclude": ["\\.json$", "\\.md$", "\\.sh$"]
+      },
+      "throttle": 60000
+    }
+  }
+  
