@@ -4,7 +4,7 @@ from datetime import datetime
 
 async def writeLog(message):
     print(message)
-    with open(f"{datetime.date(datetime.utcnow())}.log", "a") as f:
+    with open(f"./logs/{datetime.date(datetime.now())}.log", "a") as f:
         f.write(message + "\n")
 
 class Miscellaneous(commands.Cog):

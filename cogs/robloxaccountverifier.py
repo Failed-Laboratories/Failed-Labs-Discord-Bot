@@ -7,7 +7,7 @@ import time
 
 async def writeLog(message):
     print(message)
-    with open(f"{datetime.date(datetime.utcnow())}.log", "a") as f:
+    with open(f"./logs/{datetime.date(datetime.now())}.log", "a") as f:
         f.write(message + "\n")
 
 def gen_verify_phrase():
@@ -52,7 +52,7 @@ class RobloxAccountVerifier(commands.Cog):
 
             embed = discord.Embed(
                 color = discord.Color.dark_red(),
-                title = ":grey_exclamation:   Roblox Account Verification   :grey_exclamation:",
+                title = ":globe_with_meridians:   Roblox Account Verification   :globe_with_meridians:",
                 description = f"{ctx.message.author.mention} Check your DMs!"
             )
 
@@ -63,12 +63,12 @@ class RobloxAccountVerifier(commands.Cog):
         embed = discord.Embed(
             color = discord.Color.orange(),
             title = ":globe_with_meridians:   Roblox Account Verification   :globe_with_meridians:",
-            description = f"Hello **{author.name}**! Please confirm that you own the Roblox account `{r_uname}` by pasting this code into your **status**: ```{auth_code}```"
+            description = f"Hello {author}! Please confirm that you own the Roblox account `{r_uname}` by going to https://www.roblox.com/feeds/ and pasting this code into your **status**: ```{auth_code}```\nDo not worry about telling me when you've finished. I will check your status automatically and rank you if I find the code above."
         )
+        embed.set_footer(text="This prompt will expire in 60 seconds.\nFailed Labs Central Command")
 
-        with open("verifyhelp.png", "rb") as verify_help_picture:
-            picture = verify_help_picture.read()
-            await author.send(embed=embed, file=picture)
+        verify_help_picture = discord.File("verifyhelp.png", "verifyhelp.png")
+        await author.send(embed=embed, file=verify_help_picture)
 
 
 def setup(bot):

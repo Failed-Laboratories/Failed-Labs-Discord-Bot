@@ -4,10 +4,13 @@ import os
 import logging
 from datetime import datetime, timezone
 import asyncio
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
-handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
+handler = logging.FileHandler(filename='./logs/discord.log', encoding='utf-8', mode='w')
 handler.setFormatter(logging.Formatter('[%(asctime)s]: [%(levelname)s]: [%(name)s]: %(message)s'))
 logger.addHandler(handler)
 
@@ -16,7 +19,7 @@ bot.remove_command("help")
 
 async def writeLog(message):
     print(message)
-    with open(f"{datetime.date(datetime.now())}.log", "a") as f:
+    with open(f"./logs/{datetime.date(datetime.now())}.log", "a") as f:
         f.write(message + "\n")
 
 @bot.event
@@ -104,4 +107,4 @@ async def shutdown(ctx):
     
         await ctx.send(embed=embed)
 
-bot.run("NjM4ODkwMjc5ODMwNjgzNjQ4.XquvhA.yoncGquaS01sKYmYkuktqNt3nxg")
+bot.run(os.environ["DISCORDBOTKEY"])
