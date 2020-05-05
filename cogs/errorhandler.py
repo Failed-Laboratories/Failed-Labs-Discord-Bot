@@ -20,7 +20,7 @@ class ErrorHandler(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
-        await writeLog(f"[{ctx.message.created_at}]: [Moderation]: [Error]: {error}")
+        await writeLog(f"[{ctx.message.created_at}]: [Error]: {error}")
         send_message = False
         embed = discord.Embed(
             color = discord.Color.dark_red(),
@@ -30,7 +30,6 @@ class ErrorHandler(commands.Cog):
         if isinstance(error, commands.MissingRequiredArgument):
             embed.add_field(name="Error Message", value="Missing Required Arguments")
             send_message = True
-            
         
         if isinstance(error, commands.ExtensionNotLoaded):
             embed.add_field(name="Error Message", value="Extension Not Loaded")

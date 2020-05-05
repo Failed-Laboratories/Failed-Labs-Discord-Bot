@@ -70,7 +70,7 @@ async def reload(ctx, extension):
     await writeLog(f"[{ctx.message.created_at}]: [System]: Reloaded Cog: {extension}")
 
 for filename in os.listdir("./cogs"):
-    if filename.endswith(".py"):
+    if filename.endswith(".py") and not filename.endswith("_lib.py"):
         bot.load_extension(f"cogs.{filename[:-3]}")
 
 @bot.command()
