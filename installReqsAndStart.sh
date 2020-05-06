@@ -6,4 +6,4 @@ if ! [ -d ".data/$MD5-site-packages" ]; then
     pip3 install -U -r .requirements.txt -t ".data/$MD5-site-packages" 
 fi
 echo "Starting"
-exec env PYTHONPATH="$PWD/.data/$MD5-site-packages" python3 bot.py
+exec env PYTHONPATH="$PWD/.data/$MD5-site-packages" python3 main.py
