@@ -10,21 +10,21 @@ load_dotenv()
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
-handler = logging.FileHandler(filename='./logs/discord.log', encoding='utf-8', mode='w')
+handler = logging.FileHandler(filename=f'./logs/discord-{datetime.date(datetime.utcnow())}.txt', encoding='utf-8', mode='w')
 handler.setFormatter(logging.Formatter('[%(asctime)s]: [%(levelname)s]: [%(name)s]: %(message)s'))
 logger.addHandler(handler)
 
 bot = commands.Bot(command_prefix="$")
 bot.remove_command("help")
 
-async def writeLog(message):
+async def write_log(message):
     print(message)
-    with open(f"./logs/{datetime.date(datetime.now())}.log", "a") as f:
+    with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.txt", "a") as f:
         f.write(message + "\n")
 
 @bot.event
 async def on_ready():
-    await writeLog(f"[{datetime.utcnow()}]: [System]: Logged in as: {bot.user}")
+    await write_log(f"[{datetime.utcnow()}]: [System]: Logged in as: {bot.user}")
 
 @bot.command()
 async def load(ctx, extension):
@@ -39,7 +39,7 @@ async def load(ctx, extension):
     
     await ctx.send(embed=embed)
 
-    await writeLog(f"[{ctx.message.created_at}]: [System]: Loaded Cog: {extension}")
+    await write_log(f"[{ctx.message.created_at}]: [System]: Loaded Cog: {extension}")
 
 @bot.command()
 async def unload(ctx, extension):
@@ -54,7 +54,7 @@ async def unload(ctx, extension):
     
     await ctx.send(embed=embed)
 
-    await writeLog(f"[{ctx.message.created_at}]: [System]: Unloaded Cog: {extension}")
+    await write_log(f"[{ctx.message.created_at}]: [System]: Unloaded Cog: {extension}")
 
 @bot.command()
 async def reload(ctx, extension):
@@ -70,7 +70,7 @@ async def reload(ctx, extension):
     
     await ctx.send(embed=embed)
 
-    await writeLog(f"[{ctx.message.created_at}]: [System]: Reloaded Cog: {extension}")
+    await write_log(f"[{ctx.message.created_at}]: [System]: Reloaded Cog: {extension}")
 
 for filename in os.listdir("./cogs"):
     if filename.endswith(".py") and not filename.endswith("_lib.py"):
@@ -79,8 +79,8 @@ for filename in os.listdir("./cogs"):
 @bot.command()
 async def shutdown(ctx):
     if str(ctx.author) == "tycoonlover1359#6970":
-        await writeLog(f"[{ctx.message.created_at}]: [System]: {ctx.author} initiated shutdown.")
-        await writeLog(f"[{ctx.message.created_at}]: [System]: Shutting down...\n")
+        await write_log(f"[{ctx.message.created_at}]: [System]: {ctx.author} initiated shutdown.")
+        await write_log(f"[{ctx.message.created_at}]: [System]: Shutting down...\n")
 
 
         embed = discord.Embed(
@@ -96,7 +96,7 @@ async def shutdown(ctx):
 
     else:
 
-        await writeLog(f"[{ctx.message.created_at}]: [System]: {ctx.author} attempt shutdown.")
+        await write_log(f"[{ctx.message.created_at}]: [System]: {ctx.author} attempt shutdown.")
 
         embed = discord.Embed(
             color = discord.Color.dark_red(),

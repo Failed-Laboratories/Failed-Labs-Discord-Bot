@@ -2,9 +2,9 @@ import discord
 from discord.ext import commands
 from datetime import datetime
 
-async def writeLog(message):
+async def write_log(message):
     print(message)
-    with open(f"./logs/{datetime.date(datetime.now())}.log", "a") as f:
+    with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.txt", "a") as f:
         f.write(message + "\n")
 
 class Miscellaneous(commands.Cog):
@@ -15,7 +15,7 @@ class Miscellaneous(commands.Cog):
     #events
     @commands.Cog.listener()
     async def on_ready(self):
-        await writeLog(f"[{datetime.utcnow()}]: [System]: Miscellaneous Cog Loaded")
+        await write_log(f"[{datetime.utcnow()}]: [System]: Miscellaneous Cog Loaded")
 
     #Commands
     @commands.command()

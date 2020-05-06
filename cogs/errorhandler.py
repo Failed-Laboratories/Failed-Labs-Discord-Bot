@@ -3,9 +3,9 @@ from discord.ext import commands
 import asyncio
 from datetime import datetime, timezone
 
-async def writeLog(message):
+async def write_log(message):
     print(message)
-    with open(f"{datetime.date(datetime.utcnow())}.log", "a") as f:
+    with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.txt", "a") as f:
         f.write(message + "\n")
 
 class ErrorHandler(commands.Cog):
@@ -16,11 +16,11 @@ class ErrorHandler(commands.Cog):
     #Events
     @commands.Cog.listener()
     async def on_ready(self):
-        await writeLog(f"[{datetime.utcnow()}]: [System]: Error Handler Cog Loaded")
+        await write_log(f"[{datetime.utcnow()}]: [System]: Error Handler Cog Loaded")
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
-        await writeLog(f"[{ctx.message.created_at}]: [Error]: {error}")
+        await write_log(f"[{ctx.message.created_at}]: [Error]: {error}")
         send_message = False
         embed = discord.Embed(
             color = discord.Color.dark_red(),

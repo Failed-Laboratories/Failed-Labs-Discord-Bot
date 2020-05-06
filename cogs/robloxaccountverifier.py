@@ -5,9 +5,9 @@ from datetime import datetime, timezone
 import random
 import time
 
-async def writeLog(message):
+async def write_log(message):
     print(message)
-    with open(f"./logs/{datetime.date(datetime.now())}.log", "a") as f:
+    with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.txt", "a") as f:
         f.write(message + "\n")
 
 def gen_verify_phrase():
@@ -40,7 +40,7 @@ class RobloxAccountVerifier(commands.Cog):
     #Events
     @commands.Cog.listener()
     async def on_ready(self):
-        await writeLog(f"[{datetime.utcnow()}]: [System]: Roblox Account Verifier Cog Loaded")
+        await write_log(f"[{datetime.utcnow()}]: [System]: Roblox Account Verifier Cog Loaded")
 
     #Commands
     @commands.command()

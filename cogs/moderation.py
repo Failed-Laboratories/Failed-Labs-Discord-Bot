@@ -3,9 +3,9 @@ from discord.ext import commands
 import asyncio
 from datetime import datetime, timezone
 
-async def writeLog(message):
+async def write_log(message):
     print(message)
-    with open(f"./logs/{datetime.date(datetime.now())}.log", "a") as f:
+    with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.txt", "a") as f:
         f.write(message + "\n")
 
 class Moderation(commands.Cog):
@@ -16,7 +16,7 @@ class Moderation(commands.Cog):
     #Events
     @commands.Cog.listener()
     async def on_ready(self):
-        await writeLog(f"[{datetime.utcnow()}]: [System]: Moderation Cog Loaded")
+        await write_log(f"[{datetime.utcnow()}]: [System]: Moderation Cog Loaded")
 
     #Commands
     @commands.command()
@@ -34,7 +34,7 @@ class Moderation(commands.Cog):
         #await member.kick(reason=reason)
 
         await ctx.send(embed=embed)
-        await writeLog(f"[{ctx.message.created_at}]: [Moderation]: {ctx.message.author} kicked {member} for {reason}")
+        await write_log(f"[{ctx.message.created_at}]: [Moderation]: {ctx.message.author} kicked {member} for {reason}")
 
     @commands.command()
     @commands.has_permissions(kick_members=True, ban_members=True)
@@ -51,7 +51,7 @@ class Moderation(commands.Cog):
         #await member.ban(reason=reason)
 
         await ctx.send(embed=embed)
-        await writeLog(f"[{ctx.message.created_at}]: [Moderation]: {ctx.message.author} banned {member} for {reason}")
+        await write_log(f"[{ctx.message.created_at}]: [Moderation]: {ctx.message.author} banned {member} for {reason}")
 
     @commands.command()
     @commands.has_permissions(manage_messages=True)
@@ -65,7 +65,7 @@ class Moderation(commands.Cog):
         embed.set_footer(text=f"{ctx.message.author} \nFailed Labs Central Command", icon_url=f"{ctx.message.author.avatar_url}")
         
         await ctx.send(embed=embed)
-        await writeLog(f"[{ctx.message.created_at}]: [Moderation]: Purging {amount} messages from {ctx.channel}")
+        await write_log(f"[{ctx.message.created_at}]: [Moderation]: Purging {amount} messages from {ctx.channel}")
         await asyncio.sleep(1)
         await ctx.channel.purge(limit=amount+2)
 
@@ -78,8 +78,7 @@ class Moderation(commands.Cog):
 
         await ctx.send(embed=embed, delete_after=5)
 
-        await writeLog(f"[{ctx.message.created_at}]: [Moderation]: {ctx.message.author} purged {amount} messages from {ctx.channel}")
+        await write_log(f"[{ctx.message.created_at}]: [Moderation]: {ctx.message.author} purged {amount} messages from {ctx.channel}")
 
 def setup(bot):
     bot.add_cog(Moderation(bot))
-    bot.remove_command("help")
