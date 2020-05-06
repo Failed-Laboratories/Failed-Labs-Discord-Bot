@@ -1,0 +1,4 @@
+discord
+boto3
+python-dotenv
+psutil

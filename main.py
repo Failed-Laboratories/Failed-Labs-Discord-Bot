@@ -8,13 +8,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+prefix = os.environ["DISCORDBOTPREFIX"]
+
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
 handler = logging.FileHandler(filename=f'./logs/discord-{datetime.date(datetime.utcnow())}.txt', encoding='utf-8', mode='w')
 handler.setFormatter(logging.Formatter('[%(asctime)s]: [%(levelname)s]: [%(name)s]: %(message)s'))
 logger.addHandler(handler)
 
-bot = commands.Bot(command_prefix="$")
+bot = commands.Bot(command_prefix=prefix)
 bot.remove_command("help")
 
 async def write_log(message):
@@ -24,7 +26,7 @@ async def write_log(message):
 
 @bot.event
 async def on_ready():
-    await write_log(f"[{datetime.utcnow()}]: [System]: Logged in as: {bot.user}")
+    await write_log(f"[{datetime.utcnow()}]: [System]: Logged in as: {bot.user} using '{prefix}' as prefix")
 
 @bot.command()
 async def load(ctx, extension):
