@@ -1,7 +1,7 @@
-import discord
-from discord.ext import commands
 import asyncio
+import discord
 from datetime import datetime, timezone
+from discord.ext import commands
 
 async def write_log(message):
     print(message)
@@ -19,6 +19,11 @@ class Moderation(commands.Cog):
         await write_log(f"[{datetime.utcnow()}]: [System]: Moderation Cog Loaded")
 
     #Commands
+    @commands.command()
+    @commands.has_permissions(kick_members=True)
+    async def warn(self, ctx):
+        pass
+
     @commands.command()
     @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason="No Reason Given"):
@@ -56,29 +61,29 @@ class Moderation(commands.Cog):
     @commands.command()
     @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx, amount=5):
+        async with ctx.typing():
+            embed = discord.Embed(
+                color = discord.Color.orange(),
+                title = ":arrows_counterclockwise:   Message Purge   :arrows_counterclockwise:",
+                description = f"Purging {amount} Messages..."
+            )
+            embed.set_footer(text=f"{ctx.message.author} \nFailed Labs Central Command", icon_url=f"{ctx.message.author.avatar_url}")
+            
+            await ctx.send(embed=embed)
+            await write_log(f"[{ctx.message.created_at}]: [Moderation]: Purging {amount} messages from {ctx.channel}")
+            await asyncio.sleep(1)
+            await ctx.channel.purge(limit=amount+2)
 
-        embed = discord.Embed(
-            color = discord.Color.orange(),
-            title = ":arrows_counterclockwise:   Message Purge   :arrows_counterclockwise:",
-            description = f"Purging {amount} Messages..."
-        )
-        embed.set_footer(text=f"{ctx.message.author} \nFailed Labs Central Command", icon_url=f"{ctx.message.author.avatar_url}")
-        
-        await ctx.send(embed=embed)
-        await write_log(f"[{ctx.message.created_at}]: [Moderation]: Purging {amount} messages from {ctx.channel}")
-        await asyncio.sleep(1)
-        await ctx.channel.purge(limit=amount+2)
+            embed = discord.Embed(
+                color = discord.Color.green(),
+                title = ":white_check_mark:   Message Purge   :white_check_mark:",
+                description = f"Purged {amount} Messages"
+            )
+            embed.set_footer(text=f"{ctx.message.author} \nFailed Labs Central Command", icon_url=f"{ctx.message.author.avatar_url}")
 
-        embed = discord.Embed(
-            color = discord.Color.green(),
-            title = ":white_check_mark:   Message Purge   :white_check_mark:",
-            description = f"Purged {amount} Messages"
-        )
-        embed.set_footer(text=f"{ctx.message.author} \nFailed Labs Central Command", icon_url=f"{ctx.message.author.avatar_url}")
+            await ctx.send(embed=embed, delete_after=5)
 
-        await ctx.send(embed=embed, delete_after=5)
-
-        await write_log(f"[{ctx.message.created_at}]: [Moderation]: {ctx.message.author} purged {amount} messages from {ctx.channel}")
+            await write_log(f"[{ctx.message.created_at}]: [Moderation]: {ctx.message.author} purged {amount} messages from {ctx.channel}")
 
 def setup(bot):
     bot.add_cog(Moderation(bot))

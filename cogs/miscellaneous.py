@@ -1,6 +1,6 @@
 import discord
-from discord.ext import commands
 from datetime import datetime
+from discord.ext import commands
 
 async def write_log(message):
     print(message)
@@ -23,7 +23,8 @@ class Miscellaneous(commands.Cog):
 
         embed = discord.Embed(
             color = discord.Color.green(),
-            title = ":ping_pong:   Pong!   :ping_pong:"
+            title = ":ping_pong:   Pong!   :ping_pong:",
+            description = f"Latency: {round(self.bot.latency * 1000)} ms"
         )
 
         embed.set_footer(text="Failed Labs Central Command")

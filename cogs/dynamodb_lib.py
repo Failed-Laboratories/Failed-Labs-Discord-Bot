@@ -1,7 +1,7 @@
 from __future__ import print_function # Python 2/3 compatibility
 import boto3
-import json
 import decimal
+import json
 from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
 
