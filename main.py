@@ -26,7 +26,8 @@ async def write_log(message):
 
 @bot.event
 async def on_ready():
-    await write_log(f"[{datetime.utcnow()}]: [System]: Logged in as: {bot.user} using '{prefix}' as prefix")
+    await write_log(f"[{datetime.utcnow()}]: [System]: Using '{prefix}' as bot prefix")
+    await write_log(f"[{datetime.utcnow()}]: [System]: Logged in as: {bot.user}")
 
 @bot.command()
 async def load(ctx, extension):
