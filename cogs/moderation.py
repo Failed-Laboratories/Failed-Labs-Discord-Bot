@@ -1,12 +1,38 @@
 import asyncio
+import boto3
 import discord
+import json
+from boto3.dynamodb.conditions import Key, Attr
+from botocore.exceptions import ClientError
 from datetime import datetime, timezone
 from discord.ext import commands
+
+dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
 
 async def write_log(message):
     print(message)
     with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.log", "a") as f:
         f.write(message + "\n")
+
+def check_rank(acceptable_rank:list):
+    async def predicate(ctx):
+        table = dynamodb.Table("FLCC")
+        try:
+            response = table.get_item(
+                Key={
+                    "DiscordUID": f"{ctx.message.author.id}"
+                }
+            )
+        except ClientError as e:
+                await write_log(e.response['Error']['Message'])
+                return False
+        else:
+            item = response["Item"]
+            if item["PermID"] in acceptable_rank:
+                return True
+            else:
+                raise commands.MissingPermissions(acceptable_rank)
+    return commands.check(predicate)
 
 class Moderation(commands.Cog):
 
@@ -20,12 +46,12 @@ class Moderation(commands.Cog):
 
     #Commands
     @commands.command()
-    @commands.has_permissions(kick_members=True)
+    @check_rank(["DEV", "ADMIN", "MOD"])
     async def warn(self, ctx):
         pass
 
     @commands.command()
-    @commands.has_permissions(kick_members=True)
+    @check_rank(["DEV", "ADMIN", "MOD"])
     async def kick(self, ctx, member: discord.Member, *, reason="No Reason Given"):
 
         embed = discord.Embed(
@@ -42,7 +68,7 @@ class Moderation(commands.Cog):
         await write_log(f"[{ctx.message.created_at}]: [Moderation]: {ctx.message.author} kicked {member} for {reason}")
 
     @commands.command()
-    @commands.has_permissions(kick_members=True, ban_members=True)
+    @check_rank(["DEV", "ADMIN"])
     async def ban(self, ctx, member: discord.Member, *, reason="No Reason Given"):
 
         embed = discord.Embed(
@@ -59,7 +85,7 @@ class Moderation(commands.Cog):
         await write_log(f"[{ctx.message.created_at}]: [Moderation]: {ctx.message.author} banned {member} for {reason}")
 
     @commands.command()
-    @commands.has_permissions(manage_messages=True)
+    @check_rank(["DEV", "ADMIN", "MOD"])
     async def purge(self, ctx, amount=5):
         async with ctx.typing():
             embed = discord.Embed(
