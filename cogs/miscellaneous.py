@@ -4,7 +4,7 @@ from discord.ext import commands
 
 async def write_log(message):
     print(message)
-    with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.txt", "a") as f:
+    with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.log", "a") as f:
         f.write(message + "\n")
 
 class Miscellaneous(commands.Cog):

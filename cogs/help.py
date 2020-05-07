@@ -5,7 +5,7 @@ from discord.ext import commands
 
 async def write_log(message):
     print(message)
-    with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.txt", "a") as f:
+    with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.log", "a") as f:
         f.write(message + "\n")
 
 class Help(commands.Cog):
@@ -42,6 +42,7 @@ class Help(commands.Cog):
             title = ":grey_question:   Help   :grey_question:",
             description = "Developer Commands - `load`"
         )
+        embed.set_footer(text="Failed Labs Central Command")
         embed.add_field(name="Description", value="Loads a command module (cog).")
         embed.add_field(name="Usage", value="`load <module filename>`", inline=False)
         embed.add_field(name="Required Level", value="Developer")
@@ -55,6 +56,7 @@ class Help(commands.Cog):
             title = ":grey_question:   Help   :grey_question:",
             description = "Developer Commands - `unload`"
         )
+        embed.set_footer(text="Failed Labs Central Command")
         embed.add_field(name="Description", value="Unloads a command module (cog).")
         embed.add_field(name="Usage", value="`unload <module filename>`", inline=False)
         embed.add_field(name="Required Level", value="Developer")
@@ -68,6 +70,7 @@ class Help(commands.Cog):
             title = ":grey_question:   Help   :grey_question:",
             description = "Developer Commands - `reload`"
         )
+        embed.set_footer(text="Failed Labs Central Command")
         embed.add_field(name="Description", value="Reloads a command module (cog).")
         embed.add_field(name="Usage", value="`reload <module filename>`", inline=False)
         embed.add_field(name="Required Level", value="Developer")
@@ -81,6 +84,7 @@ class Help(commands.Cog):
             title = ":grey_question:   Help   :grey_question:",
             description = "Developer Commands - `shutdown`"
         )
+        embed.set_footer(text="Failed Labs Central Command")
         embed.add_field(name="Description", value="Shutsdown the bot, terminating the process gracefully.")
         embed.add_field(name="Usage", value="`shutdown`", inline=False)
         embed.add_field(name="Required Level", value="Developer")
@@ -95,6 +99,7 @@ class Help(commands.Cog):
             title = ":grey_question:   Help   :grey_question:",
             description = "Moderation Commands - `kick`"
         )
+        embed.set_footer(text="Failed Labs Central Command")
         embed.add_field(name="Description", value="Kicks a user from the server.")
         embed.add_field(name="Usage", value="`kick <user (mention or ID)> [reason]`", inline=False)
         embed.add_field(name="Required Level", value="Moderator")
@@ -108,6 +113,7 @@ class Help(commands.Cog):
             title = ":grey_question:   Help   :grey_question:",
             description = "Moderation Commands - `ban`"
         )
+        embed.set_footer(text="Failed Labs Central Command")
         embed.add_field(name="Description", value="Bans a user from the server.")
         embed.add_field(name="Usage", value="`ban <user (mention or ID)> [reason]`", inline=False)
         embed.add_field(name="Required Level", value="Administrator")
@@ -121,6 +127,7 @@ class Help(commands.Cog):
             title = ":grey_question:   Help   :grey_question:",
             description = "Moderation Commands - `purge`"
         )
+        embed.set_footer(text="Failed Labs Central Command")
         embed.add_field(name="Description", value="Mass deletes messages from the current channel.")
         embed.add_field(name="Usage", value="`purge [amount (default is 5)]`", inline=False)
         embed.add_field(name="Required Level", value="Moderator")
@@ -135,6 +142,7 @@ class Help(commands.Cog):
             title = ":grey_question:   Help   :grey_question:",
             description = "Miscellaneous Commands - `ping`"
         )
+        embed.set_footer(text="Failed Labs Central Command")
         embed.add_field(name="Description", value="Returns a ping pong ball. And the bot's latency.")
         embed.add_field(name="Usage", value="`ping`", inline=False)
         embed.add_field(name="Required Level", value="Visitor")
@@ -149,6 +157,7 @@ class Help(commands.Cog):
             title = ":grey_question:   Help   :grey_question:",
             description = "Statistics Commands - `stats`"
         )
+        embed.set_footer(text="Failed Labs Central Command")
         embed.add_field(name="Description", value="Displays the bot's current resource usage statistics.")
         embed.add_field(name="Usage", value="`stats`", inline=False)
         embed.add_field(name="Required Level", value="Visitor")
@@ -163,6 +172,7 @@ class Help(commands.Cog):
             title = ":grey_question:   Help   :grey_question:",
             description = "Verification Commands - `verify`"
         )
+        embed.set_footer(text="Failed Labs Central Command")
         embed.add_field(name="Description", value="Verifies ownership of a Roblox account, linking it to the current Discord user.")
         embed.add_field(name="Usage", value="`verify <Roblox username>`", inline=False)
         embed.add_field(name="Required Level", value="Visitor")

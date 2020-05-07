@@ -12,7 +12,7 @@ prefix = os.environ["DISCORDBOTPREFIX"]
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
-handler = logging.FileHandler(filename=f'./logs/discord-{datetime.date(datetime.utcnow())}.txt', encoding='utf-8', mode='w')
+handler = logging.FileHandler(filename=f'./logs/discord-{datetime.date(datetime.utcnow())}.log', encoding='utf-8', mode='w')
 handler.setFormatter(logging.Formatter('[%(asctime)s]: [%(levelname)s]: [%(name)s]: %(message)s'))
 logger.addHandler(handler)
 

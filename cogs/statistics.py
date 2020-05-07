@@ -6,7 +6,7 @@ from discord.ext import commands
 
 async def write_log(message):
     print(message)
-    with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.txt", "a") as f:
+    with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.log", "a") as f:
         f.write(message + "\n")
 
 def truncate(number, digits):
@@ -30,7 +30,6 @@ class Statistics(commands.Cog):
         mem_stats = dict(psutil.virtual_memory()._asdict())
         mem_tot = truncate(mem_stats["total"]/1000000, 2)
         mem_used = truncate(mem_stats["used"]/1000000, 2)
-        mem_ava = truncate(mem_stats["available"]/1000000, 2)
         cpu_per = psutil.cpu_percent()
 
         embed = discord.Embed(
