@@ -2,11 +2,11 @@ import asyncio
 import discord
 import logging
 import os
+import set_enviro_vars
 from datetime import datetime, timezone
 from discord.ext import commands
-from dotenv import load_dotenv
 
-load_dotenv()
+set_enviro_vars.set_enviroment()
 
 prefix = os.environ["DISCORDBOTPREFIX"]
 
@@ -21,7 +21,7 @@ bot.remove_command("help")
 
 async def write_log(message):
     print(message)
-    with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.txt", "a") as f:
+    with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.log", "a") as f:
         f.write(message + "\n")
 
 @bot.event
