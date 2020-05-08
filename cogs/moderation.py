@@ -1,22 +1,32 @@
+import aiohttp
 import asyncio
 import boto3
+import decimal
 import discord
+import io
 import json
+import logging
+import math
+import os
+import psutil
+import random
+import time
+import uuid
 from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
 from datetime import datetime, timezone
 from discord.ext import commands
-
-dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
 
 async def write_log(message):
     print(message)
     with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.log", "a") as f:
         f.write(message + "\n")
 
+dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
+
 def check_rank(acceptable_rank:list):
     async def predicate(ctx):
-        table = dynamodb.Table("FLCC")
+        table = dynamodb.Table("FLCC_User_Ranks")
         try:
             response = table.get_item(
                 Key={
@@ -34,6 +44,30 @@ def check_rank(acceptable_rank:list):
                 raise commands.MissingPermissions(acceptable_rank)
     return commands.check(predicate)
 
+async def add_log(ctx, member, action:str, reason="No Reason Given"):
+
+    infrac_id = str(uuid.uuid4())
+    infrac_time = "{:%Y-%m-%d %H:%M:%S}".format(ctx.message.created_at)
+
+    try:
+        table = dynamodb.Table("FLCC_Moderation_Log")
+        table.put_item(
+            Item={
+                "InfractionID": infrac_id,
+                "Date": infrac_time,
+                "Action": action,
+                "OffenderDUID": str(member.id),
+                "ModeratorDUID": str(ctx.message.author.id),
+                "Reason": str(reason)
+            }
+        )
+    except ClientError as e:
+        await write_log(e.response['Error']['Message'])
+        return {"Success": False, "InfracID": None, "InfracTime": None}
+    else:
+        return {"Success": True, "InfracID": infrac_id, "InfracTime": infrac_time}
+
+
 class Moderation(commands.Cog):
 
     def __init__(self, bot):
@@ -47,42 +81,59 @@ class Moderation(commands.Cog):
     #Commands
     @commands.command()
     @check_rank(["DEV", "ADMIN", "MOD"])
-    async def warn(self, ctx):
-        pass
+    async def warn(self, ctx, member:discord.Member, *, reason="No Reason Given"):
+        success, infrac_id, infrac_time = await add_log(ctx, member, "Warn", reason)
+
+        if success:
+            embed = discord.Embed(
+                color = discord.Color.orange(),
+                title = ":exclamation:   Warned   :exclamation:"
+            )
+            embed.add_field(name="Reason", value=f"{reason}")
+            embed.set_author(name=f"{member}", icon_url=f"{member.avatar_url}")
+            embed.set_footer(text=f"{ctx.message.author} \nFailed Labs Central Command", icon_url=f"{ctx.message.author.avatar_url}")
+
+            await ctx.send(embed=embed)
+            await write_log(f"[{ctx.message.created_at}]: [Moderation]: {ctx.message.author} warned {member} for {reason}")
 
     @commands.command()
     @check_rank(["DEV", "ADMIN", "MOD"])
     async def kick(self, ctx, member: discord.Member, *, reason="No Reason Given"):
+        success, infrac_id, infrac_time = await add_log(ctx, member, "Kick", reason)
 
-        embed = discord.Embed(
-            color = discord.Color.orange(),
-            title = ":boot:   Kicked   :boot:"
-        )
-        embed.add_field(name="Reason", value=f"{reason}")
-        embed.set_author(name=f"{member}", icon_url=f"{member.avatar_url}")
-        embed.set_footer(text=f"{ctx.message.author} \nFailed Labs Central Command", icon_url=f"{ctx.message.author.avatar_url}")
+        if success:
+            embed = discord.Embed(
+                color = discord.Color.orange(),
+                title = ":boot:   Kicked   :boot:"
+            )
+            embed.add_field(name="Reason", value=f"{reason}")
+            embed.set_author(name=f"{member}", icon_url=f"{member.avatar_url}")
+            embed.set_footer(text=f"{ctx.message.author} \nFailed Labs Central Command", icon_url=f"{ctx.message.author.avatar_url}")
 
-        #await member.kick(reason=reason)
+            #await member.kick(reason=reason)
 
-        await ctx.send(embed=embed)
-        await write_log(f"[{ctx.message.created_at}]: [Moderation]: {ctx.message.author} kicked {member} for {reason}")
+            await ctx.send(embed=embed)
+            await write_log(f"[{ctx.message.created_at}]: [Moderation]: {ctx.message.author} kicked {member} for {reason}")
+        
 
     @commands.command()
     @check_rank(["DEV", "ADMIN"])
     async def ban(self, ctx, member: discord.Member, *, reason="No Reason Given"):
+        success, infrac_id, infrac_time = await add_log(ctx, member, "Ban", reason)
 
-        embed = discord.Embed(
-            color = discord.Color.dark_red(),
-            title = ":no_entry:   Banned   :no_entry:"
-        )
-        embed.add_field(name="Reason", value=f"{reason}")
-        embed.set_author(name=f"{member}", icon_url=f"{member.avatar_url}")
-        embed.set_footer(text=f"{ctx.message.author} \nFailed Labs Central Command", icon_url=f"{ctx.message.author.avatar_url}")
+        if success:
+            embed = discord.Embed(
+                color = discord.Color.dark_red(),
+                title = ":no_entry:   Banned   :no_entry:"
+            )
+            embed.add_field(name="Reason", value=f"{reason}")
+            embed.set_author(name=f"{member}", icon_url=f"{member.avatar_url}")
+            embed.set_footer(text=f"{ctx.message.author} \nFailed Labs Central Command", icon_url=f"{ctx.message.author.avatar_url}")
 
-        #await member.ban(reason=reason)
+            #await member.ban(reason=reason)
 
-        await ctx.send(embed=embed)
-        await write_log(f"[{ctx.message.created_at}]: [Moderation]: {ctx.message.author} banned {member} for {reason}")
+            await ctx.send(embed=embed)
+            await write_log(f"[{ctx.message.created_at}]: [Moderation]: {ctx.message.author} banned {member} for {reason}")
 
     @commands.command()
     @check_rank(["DEV", "ADMIN", "MOD"])

@@ -1,10 +1,18 @@
+import aiohttp
 import asyncio
 import boto3
+import decimal
 import discord
+import io
 import json
 import logging
+import math
 import os
+import psutil
+import random
 import set_enviro_vars
+import time
+import uuid
 from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
 from datetime import datetime, timezone
@@ -55,6 +63,7 @@ def check_rank(acceptable_rank:list):
 async def on_ready():
     await write_log(f"[{datetime.utcnow()}]: [System]: Using '{prefix}' as bot prefix")
     await write_log(f"[{datetime.utcnow()}]: [System]: Logged in as: {bot.user}")
+    await bot.change_presence(activity=discord.Game(name=f"{prefix}help"))
 
 #Commands
 @bot.command()

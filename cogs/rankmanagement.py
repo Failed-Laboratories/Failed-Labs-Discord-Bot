@@ -1,33 +1,49 @@
+import aiohttp
 import asyncio
 import boto3
 import decimal
 import discord
 import io
 import json
+import logging
+import math
+import os
+import psutil
 import random
 import time
+import uuid
 from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
 from datetime import datetime, timezone
 from discord.ext import commands
-from urllib import request
 
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
-
-# Helper class to convert a DynamoDB item to JSON.
-class DecimalEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, decimal.Decimal):
-            if o % 1 > 0:
-                return float(o)
-            else:
-                return int(o)
-        return super(DecimalEncoder, self).default(o)
 
 async def write_log(message):
     print(message)
     with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.log", "a") as f:
         f.write(message + "\n")
+
+def check_rank(acceptable_rank:list):
+    async def predicate(ctx):
+        table = dynamodb.Table("FLCC_User_Ranks")
+        try:
+            response = table.get_item(
+                Key={
+                    "DiscordUID": f"{ctx.message.author.id}"
+                }
+            )
+        except ClientError as e:
+                await write_log(e.response['Error']['Message'])
+                return False
+        else:
+            item = response["Item"]
+            if item["PermID"] in acceptable_rank:
+                return True
+            else:
+                raise commands.MissingPermissions(acceptable_rank)
+    return commands.check(predicate)
+
 
 class RankManagement(commands.Cog):
 
