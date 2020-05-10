@@ -34,8 +34,8 @@ def check_rank(acceptable_rank:list):
                 }
             )
         except ClientError as e:
-                await write_log(e.response['Error']['Message'])
-                return False
+            await write_log(f"[{datetime.utcnow()}]: [Database Access]: {e.response['Error']['Message']}")
+            return False
         else:
             item = response["Item"]
             if item["PermID"] in acceptable_rank:
@@ -171,30 +171,6 @@ class RobloxAccountVerifier(commands.Cog):
                                 do_verify = False
                             else:
                                 r_uid = data["Id"]
-            
-            if do_verify:
-                try:
-                    response = table.scan(
-                        ProjectionExpression="DiscordUID, RobloxUID",
-                        FilterExpression=Key("RobloxUID").eq(str(r_uid))
-                    )
-                except ClientError as e:
-                    await write_log(e.response['Error']['Message'])
-                else:
-                    items = response["Items"]
-
-                for x in items:
-                    if "DiscordUID" in items[0]:
-                        embed = discord.Embed(
-                            color = discord.Color.dark_red(),
-                            title = ":warning:   Roblox Account Verification Error   :warning:",
-                            description = f"Roblox User `{r_uname}` is already linked to an account.\nPlease try again or contact a staff member for more assistance."
-                        )
-                        embed.set_footer(text="Failed Labs Central Command")
-
-                        await author.send(embed=embed)
-                        await write_log(f"[{datetime.utcnow()}]: [Verification]: Verification for {ctx.message.author.name} to {r_uname} failed: Roblox user already linked to a Discord account.")
-                        do_verify = False
 
         if do_verify:
 

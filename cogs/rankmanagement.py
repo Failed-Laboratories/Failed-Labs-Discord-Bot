@@ -34,8 +34,8 @@ def check_rank(acceptable_rank:list):
                 }
             )
         except ClientError as e:
-                await write_log(e.response['Error']['Message'])
-                return False
+            await write_log(f"[{datetime.utcnow()}]: [Database Access]: {e.response['Error']['Message']}")
+            return False
         else:
             item = response["Item"]
             if item["PermID"] in acceptable_rank:
@@ -56,6 +56,8 @@ class RankManagement(commands.Cog):
         await write_log(f"[{datetime.utcnow()}]: [System]: Rank Management Cog Loaded")
 
     #Commands
+    async def rank(self, ctx, user : discord.Member, new_rank):
+        pass
     
 
 def setup(bot):
