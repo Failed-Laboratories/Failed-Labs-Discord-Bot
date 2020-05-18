@@ -56,8 +56,24 @@ class RankManagement(commands.Cog):
         await write_log(f"[{datetime.utcnow()}]: [System]: Rank Management Cog Loaded")
 
     #Commands
-    async def rank(self, ctx, user : discord.Member, new_rank):
-        pass
+    @commands.group(name="rank", invoke_without_command=True)
+    async def rank(self, ctx, member:discord.Member):
+        embed = discord.Embed(
+            color = discord.Color.orange()
+        )
+
+        table = dynamodb.Table("FLCC_User")
+        userdata = {}
+        response = table.get_item(
+            Key = {
+                "DiscordUID": f"{member.id}"
+            }
+        )
+        
+        embed.set_author(name=f"{member}", icon_url=f"{member.avatar_url}")
+        
+        await ctx.send(embed=embed)
+
 
 def setup(bot):
     bot.add_cog(RankManagement(bot))

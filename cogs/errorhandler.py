@@ -23,6 +23,7 @@ async def write_log(message):
         f.write(message + "\n")
 
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
+db = boto3.client("dynamodb")
 
 def check_rank(acceptable_rank:list):
     async def predicate(ctx):
@@ -63,11 +64,6 @@ class ErrorHandler(commands.Cog):
             color = discord.Color.dark_red(),
             title = ":warning: Error :warning:"
         )
-
-        if isinstance(error, ClientError):
-            embed.add_field(name="Error Message", value="An error has occurred while accessing the database. If this continues, please alert the developer immediately.")
-            send_message = True
-            set_footer = True
 
         if isinstance(error, commands.MissingPermissions):
             embed.add_field(name="Error Message", value="You do not have permission to use this command.")
