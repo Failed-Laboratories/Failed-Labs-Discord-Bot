@@ -40,14 +40,22 @@ async def write_log(message):
 
 def check_rank(acceptable_rank:list):
     async def predicate(ctx):
-        return True
-        # async with aiohttp.ClientSession() as session:
-        #     async with session.get("") as response:
-        #         item = response["Item"]
-        #         if item["PermID"] in acceptable_rank:
-        #             return True
-        #         else:
-        #             raise commands.MissingPermissions(acceptable_rank)
+        table = dynamodb.Table("FLCC_Users")
+        try:
+            response = table.get_item(
+                Key={
+                    "DiscordUID": f"{ctx.message.author.id}"
+                }
+            )
+        except ClientError as e:
+            await write_log(f"[{datetime.utcnow()}]: [Database Access]: {e.response['Error']['Message']}")
+            return False
+        else:
+            item = response["Item"]
+            if item["PermID"] in acceptable_rank:
+                return True
+            else:
+                raise commands.MissingPermissions(acceptable_rank)
     return commands.check(predicate)
         
 #Events

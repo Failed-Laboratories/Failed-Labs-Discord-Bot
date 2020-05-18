@@ -26,7 +26,7 @@ async def write_log(message):
 
 def check_rank(acceptable_rank:list):
     async def predicate(ctx):
-        table = dynamodb.Table("FLCC_User_Ranks")
+        table = dynamodb.Table("FLCC_Users")
         try:
             response = table.get_item(
                 Key={
@@ -58,7 +58,6 @@ class RankManagement(commands.Cog):
     #Commands
     async def rank(self, ctx, user : discord.Member, new_rank):
         pass
-    
 
 def setup(bot):
     bot.add_cog(RankManagement(bot))

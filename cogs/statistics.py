@@ -26,7 +26,7 @@ dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
 
 def check_rank(acceptable_rank:list):
     async def predicate(ctx):
-        table = dynamodb.Table("FLCC_User_Ranks")
+        table = dynamodb.Table("FLCC_Users")
         try:
             response = table.get_item(
                 Key={

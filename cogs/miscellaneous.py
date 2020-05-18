@@ -26,7 +26,7 @@ dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
 
 def check_rank(acceptable_rank:list):
     async def predicate(ctx):
-        table = dynamodb.Table("FLCC_User_Ranks")
+        table = dynamodb.Table("FLCC_Users")
         try:
             response = table.get_item(
                 Key={
@@ -76,6 +76,11 @@ class Miscellaneous(commands.Cog):
             description = iter*":ping_pong:"
         )
         await ctx.send(embed=embed)
+
+    @commands.command()
+    async def pfp(self, ctx):
+        profilePic = str(ctx.message.author.avatar_url_as(static_format="jpg", size=4096))
+        await ctx.send(profilePic)
 
 def setup(bot):
     bot.add_cog(Miscellaneous(bot))

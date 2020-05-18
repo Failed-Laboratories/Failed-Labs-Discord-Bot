@@ -26,7 +26,7 @@ dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
 
 def check_rank(acceptable_rank:list):
     async def predicate(ctx):
-        table = dynamodb.Table("FLCC_User_Ranks")
+        table = dynamodb.Table("FLCC_Users")
         try:
             response = table.get_item(
                 Key={
@@ -214,6 +214,55 @@ class Help(commands.Cog):
         embed.add_field(name="Required Level", value="Visitor")
 
         await ctx.send(embed=embed)
+
+    #Other commands
+    @commands.command()
+    async def about(self, ctx):
+        author = ctx.message.author
+        if str(ctx.channel.type) != "private":
+
+            embed = discord.Embed(
+                color = discord.Color.blue(),
+            title = ":robot:   About Me   :robot:",
+                description = f"{ctx.message.author.mention} Check your DMs!"
+            )
+
+            await ctx.send(embed=embed)
+
+        embed = discord.Embed(
+            color = discord.Color.blue(),
+            title = ":robot:   About Me   :robot:",
+        )
+        embed.add_field(
+            name="Who are you?",
+            value="Hello! I am the Failed Labs Discord Bot, also known as Failed Labs Central Command. I am a custom made bot that handles everything the Failed Laboratories needs me to handle. Everything from rank management and promotion to moderation, I am made to handle it so that the adminstrators and moderators don't have to do it themselves.",
+            inline=False
+        )
+        embed.add_field(
+            name="How are you hosted?",
+            value="I'm hosted on a Google Cloud Platform Cloud Compute `f1-micro` VM instance. Although this doesn't sound like it could handle very much, you'd be surprised at what it can handle, even with a fairly inexperienced coder (aka my developer) making fairly unoptimized code. Despite this, I run quite well on the GCP VM I run on, using only around 20 megabytes of RAM.",
+            inline=False
+        )
+        embed.add_field(
+            name="What else are you using?",
+            value="In addition to Google Cloud Platform, I also use Amazon AWS, or Amazon Web Services. I use Amazon DynamoDB as the database service for all the databases I use to manage everything from the amount of points you have to the number of moderation incidents have occurred throughout the server as a whole. Additionally, the databases also have a custom HTTP API setup so that Failed Labs Developers can interact with the databases in game. This API is built on both Amazon API Gateway as well as Amazon Lambda, allowing the databases to have reliable, scalable, yet cost-effective API service."
+        )
+        embed.add_field(
+            name="What are you coded in?",
+            value="I'm coded in Python! Go Python! Now, why didn't my developer use JavaScript and Node, or something else like C# or C++? Quite frankly, as I've been told to tell you, it's because he wanted to use Python, so deal with it. Why don't you want to use Python?",
+            inline=False
+        )
+        embed.add_field(
+            name="Who made you?",
+            value="I am coded and maintained by our wonderful Chief Operating Officer, tycoonlover1359. He learned Python just to be able to make cool things both for him and so that he could make me, the bot talking to you right now.",
+            inline=False
+        )
+        embed.add_field(
+            name="What if I have other questions?",
+            value="If you have any other questions, feel free to message tycoonlover1359. (He may or may not responed...it just depends.)",
+            inline=False
+        )
+        await author.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(Help(bot))
