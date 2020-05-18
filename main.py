@@ -101,8 +101,7 @@ async def unload(ctx, extension):
 @bot.command()
 @check_rank(["DEV"])
 async def reload(ctx, extension):
-    bot.unload_extension(f"cogs.{extension}")
-    bot.load_extension(f"cogs.{extension}")
+    bot.reload_extension(f"cogs.{extension}")
 
     embed = discord.Embed(
         color = discord.Color.green(),

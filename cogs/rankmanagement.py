@@ -46,17 +46,16 @@ class RankManagement(commands.Cog):
 
     #Commands
     @commands.group(name="rank", invoke_without_command=True)
-    async def rank(self, ctx, member=None):
+    async def rank(self, ctx):
         userdata = {}
         embed = discord.Embed(
             color = discord.Color.orange()
         )
 
-        if member != None:
-            userdata = fldb.getUserInfo(f"{member.id}")
-        else:
-            member = ctx.message.author
-            userdata = fldb.getUserInfo(f"{member.id}")
+        member = ctx.message.author
+        userdata = fldb.getUserInfo(f"{member.id}")
+
+        embed.set_author(name=f"{member}", icon_url=f"{member.avatar_url}")
         
         await ctx.send(embed=embed)
 
