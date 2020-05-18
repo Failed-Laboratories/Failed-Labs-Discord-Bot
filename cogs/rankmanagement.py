@@ -1,6 +1,6 @@
-import aiohttp
 import asyncio
 import boto3
+import flcc_dbhandler as fldb
 import decimal
 import discord
 import io
@@ -26,22 +26,11 @@ async def write_log(message):
 
 def check_rank(acceptable_rank:list):
     async def predicate(ctx):
-        table = dynamodb.Table("FLCC_Users")
-        try:
-            response = table.get_item(
-                Key={
-                    "DiscordUID": f"{ctx.message.author.id}"
-                }
-            )
-        except ClientError as e:
-            await write_log(f"[{datetime.utcnow()}]: [Database Access]: {e.response['Error']['Message']}")
-            return False
+        rank = fldb.getUserInfo(f"{ctx.message.author.id}", "PermID")
+        if rank in acceptable_rank:
+            return True 
         else:
-            item = response["Item"]
-            if item["PermID"] in acceptable_rank:
-                return True
-            else:
-                raise commands.MissingPermissions(acceptable_rank)
+            raise commands.MissingPermissions(acceptable_rank)
     return commands.check(predicate)
 
 
@@ -57,37 +46,17 @@ class RankManagement(commands.Cog):
 
     #Commands
     @commands.group(name="rank", invoke_without_command=True)
-    async def rank(self, ctx, member:discord.Member):
+    async def rank(self, ctx, member=None):
+        userdata = {}
         embed = discord.Embed(
             color = discord.Color.orange()
         )
 
-        try:
-            table = dynamodb.Table("FLCC_User")
-            userdata = {}
-            response = table.get_item(
-                Key = {
-                    "DiscordUID": f"{member.id}"
-                }
-            )
-        except boto3.client("dynamodb").exceptions.ResourceNotFoundException as e:
-            await write_log(f"[{datetime.utcnow()}]: [Database Access]: {e.response['Error']['Message']}")
-            embed = discord.Embed(
-                color = discord.Color.dark_red(),
-                title = ":warning: Error :warning:"
-            )
-            embed.add_field(name="Error Message", value="An error occurred while accessing the database. Please contact the developer if this continues.")
-        except ClientError as e:
-            await write_log(f"[{datetime.utcnow()}]: [Database Access]: {e.response['Error']['Message']}")
-            embed = discord.Embed(
-                color = discord.Color.dark_red(),
-                title = ":warning: Error :warning:"
-            )
-            embed.add_field(name="Error Message", value="An error occurred while accessing the database. Please contact the developer if this continues.")
+        if member != None:
+            userdata = fldb.getUserInfo(f"{member.id}")
         else:
-            pass
-        
-        embed.set_author(name=f"{member}", icon_url=f"{member.avatar_url}")
+            member = ctx.message.author
+            userdata = fldb.getUserInfo(f"{member.id}")
         
         await ctx.send(embed=embed)
 
