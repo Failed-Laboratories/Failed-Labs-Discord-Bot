@@ -62,13 +62,30 @@ class RankManagement(commands.Cog):
             color = discord.Color.orange()
         )
 
-        table = dynamodb.Table("FLCC_User")
-        userdata = {}
-        response = table.get_item(
-            Key = {
-                "DiscordUID": f"{member.id}"
-            }
-        )
+        try:
+            table = dynamodb.Table("FLCC_User")
+            userdata = {}
+            response = table.get_item(
+                Key = {
+                    "DiscordUID": f"{member.id}"
+                }
+            )
+        except boto3.client("dynamodb").exceptions.ResourceNotFoundException as e:
+            await write_log(f"[{datetime.utcnow()}]: [Database Access]: {e.response['Error']['Message']}")
+            embed = discord.Embed(
+                color = discord.Color.dark_red(),
+                title = ":warning: Error :warning:"
+            )
+            embed.add_field(name="Error Message", value="An error occurred while accessing the database. Please contact the developer if this continues.")
+        except ClientError as e:
+            await write_log(f"[{datetime.utcnow()}]: [Database Access]: {e.response['Error']['Message']}")
+            embed = discord.Embed(
+                color = discord.Color.dark_red(),
+                title = ":warning: Error :warning:"
+            )
+            embed.add_field(name="Error Message", value="An error occurred while accessing the database. Please contact the developer if this continues.")
+        else:
+            pass
         
         embed.set_author(name=f"{member}", icon_url=f"{member.avatar_url}")
         
