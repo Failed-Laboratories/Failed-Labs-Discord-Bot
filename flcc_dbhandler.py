@@ -36,13 +36,20 @@ def getUserInfo(userid:str, choice=None):
 def createNewUser(DiscordUID:str, DiscordUName:str, DiscordUDiscriminator:str, RobloxUID:str, RobloxUName:str):
     try:
         table = dynamodb.Table("FLCC_Users")
-        response = table.put_item(
+        table.put_item(
             Item={
+                "Awards": {},
+                "Banned": False,
+                "DiscordUDiscriminator": DiscordUDiscriminator,
                 "DiscordUID": DiscordUID,
                 "DiscordUName": DiscordUName,
-                "DiscordUDiscriminator": DiscordUDiscriminator,
+                "Kicks": "0",
+                "PermID": "L1",
+                "Points": "0",
+                "RankID": "SCI",
                 "RobloxUID": RobloxUID,
-                "RobloxUName": RobloxUName
+                "RobloxUName": RobloxUName,
+                "Warns": "0"
             }
         )
     except ClientError as e:
