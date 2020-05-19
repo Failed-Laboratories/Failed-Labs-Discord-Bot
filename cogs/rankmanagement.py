@@ -1,3 +1,4 @@
+import aiohttp
 import asyncio
 import boto3
 import flcc_dbhandler as fldb
@@ -48,16 +49,23 @@ class RankManagement(commands.Cog):
     @commands.group(name="rank", invoke_without_command=True)
     async def rank(self, ctx):
         userdata = {}
-        embed = discord.Embed(
-            color = discord.Color.orange()
-        )
-
         member = ctx.message.author
         userdata = fldb.getUserInfo(f"{member.id}")
-
-        embed.set_author(name=f"{member}", icon_url=f"{member.avatar_url}")
-        
-        await ctx.send(embed=embed)
+        if userdata != {} or userdata != "Error":
+            async with aiohttp.ClientSession() as session:
+                pass
+            ranks = json.load(open("./files/ranks.json"))
+            userRank = ranks[userdata["RankID"]]["Name"]
+            perms = json.load(open("./files/permissions.json"))
+            userPerm = perms[userdata["PermID"]]
+            embed = discord.Embed(
+                color = discord.Color.blue()
+            )
+            embed.set_author(name=f"{member}", icon_url=f"{member.avatar_url}")
+            embed.add_field(name="Rank", value=f"{userRank}", inline=False)
+            embed.add_field(name="Permission Level", value=f"{userPerm}", inline=False)
+            
+            await ctx.send(embed=embed)
 
 
 def setup(bot):

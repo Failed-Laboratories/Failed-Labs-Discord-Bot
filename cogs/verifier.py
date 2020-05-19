@@ -45,7 +45,7 @@ def check_rank(acceptable_rank:list):
     return commands.check(predicate)
 
 def gen_verify_phrase():
-    with open("authdict.txt") as word_list:
+    with open("./files/authdict.txt") as word_list:
         words = word_list.readlines()
 
     for x in range (0, len(words)):
@@ -180,24 +180,29 @@ class RobloxAccountVerifier(commands.Cog):
             embed = discord.Embed(
                 color = discord.Color.orange(),
                 title = ":globe_with_meridians:   Roblox Account Verification   :globe_with_meridians:",
-                description = f"Hello {author.mention}!\n\nYou will be verifying the following Roblox account: ```{r_uname}```\nGo to https://www.roblox.com/feeds/ and paste this code into your **status**: ```{auth_code}```\nDon't worry about telling me when you've finished. I'll check your status automatically and rank you if I find the code above.\n\nI will indicate to you that I am still checking your status by 'typing'. If I stop, the prompt has timed out and you will need to run the verify command again."
+                description = f"Hello {author.mention}!\n\nYou will be verifying the following Roblox account: ```{r_uname}```\nGo to https://www.roblox.com/feeds/ and paste this code into your **status**, or you can go to https://www.roblox.com/my/account and paste this code into your **profile**: ```{auth_code}```\nDon't worry about telling me when you've finished. I'll check your status automatically and rank you if I find the code above.\n\nI will indicate to you that I am still checking your status by 'typing'. If I stop, the prompt has timed out and you will need to run the verify command again."
             )
             embed.set_footer(text="This prompt will expire in 60 seconds.\nFailed Labs Central Command")
 
-            verify_help_picture = discord.File(
-                fp = "verifyhelp.png",
-                filename = "verify_help_pic.png",
+            verify_by_status = discord.File(
+                fp = "./files/verifybystatus.png",
+                filename = "verifybystatus.png",
+                spoiler = False
+            )
+            verify_by_profile = discord.File(
+                fp = "./files/verifybyprofile.png",
+                filename = "verifybyprofile.png",
                 spoiler = False
             )
 
-            await author.send(embed=embed, file=verify_help_picture)
+            await author.send(embed=embed, files=[verify_by_status, verify_by_profile])
 
             verified = False
             check_status = True
             x = 0
 
             async with author.typing():
-                while check_status and x <= 60:
+                while check_status and x <= 15:
                     async with aiohttp.ClientSession() as session:
                         async with session.get(f"https://users.roblox.com/v1/users/{r_uid}/status") as response:
                             if response.status == 200:
@@ -206,8 +211,17 @@ class RobloxAccountVerifier(commands.Cog):
                                     check_status = False
                                     verified = True
                                     break
+                        await asyncio.sleep(0.5)
+                        async with session.get(f"https://users.roblox.com/v1/users/{r_uid}") as response:
+                            if response.status == 200:
+                                data = json.loads(await response.text())
+                                description = data["description"]
+                                if description.find(auth_code) != -1:
+                                    check_status = False
+                                    verified = True
+                                    break
                     x = x + 1
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(0.5)
 
                 if verified:
 

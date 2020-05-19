@@ -1,0 +1,17 @@
+{
+    "CEO": {
+        "Name": "Chief Executive Officer",
+        "MinPts": "100",
+        "MaxPts": "100"
+    },
+    "COO": {
+        "Name": "Chief Operating Officer",
+        "MinPts": "100",
+        "MaxPts": "100"
+    },
+    "SCI": {
+        "Name": "Scientist",
+        "MinPts": "0",
+        "MaxPts": "10"
+    }
+}

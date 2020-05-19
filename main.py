@@ -1,24 +1,14 @@
-import aiohttp
 import asyncio
-import boto3
-import decimal
 import discord
-import io
-import json
+import flcc_dbhandler as fldb
 import logging
-import math
 import os
-import psutil
-import random
-import set_enviro_vars
+import set_enviro_vars as sev
 import time
-import uuid
-from boto3.dynamodb.conditions import Key, Attr
-from botocore.exceptions import ClientError
 from datetime import datetime, timezone
 from discord.ext import commands
 
-set_enviro_vars.set_enviroment()
+sev.set_enviroment()
 
 prefix = os.environ["DISCORDBOTPREFIX"]
 
@@ -27,8 +17,6 @@ logger.setLevel(logging.DEBUG)
 handler = logging.FileHandler(filename=f'./logs/discord-{datetime.date(datetime.utcnow())}.log', encoding='utf-8', mode='w')
 handler.setFormatter(logging.Formatter('[%(asctime)s]: [%(levelname)s]: [%(name)s]: %(message)s'))
 logger.addHandler(handler)
-
-dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
 
 bot = commands.Bot(command_prefix=prefix)
 bot.remove_command("help")
@@ -40,22 +28,11 @@ async def write_log(message):
 
 def check_rank(acceptable_rank:list):
     async def predicate(ctx):
-        table = dynamodb.Table("FLCC_Users")
-        try:
-            response = table.get_item(
-                Key={
-                    "DiscordUID": f"{ctx.message.author.id}"
-                }
-            )
-        except ClientError as e:
-            await write_log(f"[{datetime.utcnow()}]: [Database Access]: {e.response['Error']['Message']}")
-            return False
+        rank = fldb.getUserInfo(f"{ctx.message.author.id}", "PermID")
+        if rank in acceptable_rank:
+            return True 
         else:
-            item = response["Item"]
-            if item["PermID"] in acceptable_rank:
-                return True
-            else:
-                raise commands.MissingPermissions(acceptable_rank)
+            raise commands.MissingPermissions(acceptable_rank)
     return commands.check(predicate)
         
 #Events
@@ -114,10 +91,6 @@ async def reload(ctx, extension):
 
     await write_log(f"[{ctx.message.created_at}]: [System]: Reloaded Cog: {extension}")
 
-for filename in os.listdir("./cogs"):
-    if filename.endswith(".py") and not filename.endswith("_lib.py"):
-        bot.load_extension(f"cogs.{filename[:-3]}")
-
 @bot.command()
 @check_rank(["DEV"])
 async def shutdown(ctx):
@@ -135,5 +108,11 @@ async def shutdown(ctx):
         await ctx.send(embed=embed)
 
         await bot.logout()
+
+#Cogs Loader
+for filename in os.listdir("./cogs"):
+    if filename.endswith(".py") and not filename.endswith("_lib.py"):
+        bot.load_extension(f"cogs.{filename[:-3]}")
+
 
 bot.run(os.environ["DISCORDBOTKEY"])

@@ -3,7 +3,6 @@ from datetime import datetime
 from botocore.exceptions import ClientError
 
 dynamodb = boto3.resource("dynamodb", region_name="us-west-2")
-db = boto3.client("dynamodb")
 
 def write_log(message):
     print(message)
@@ -11,6 +10,7 @@ def write_log(message):
         f.write(message + "\n")
 
 def getUserInfo(userid:str, choice=None):
+    write_log(f"[{datetime.utcnow()}]: [Database Access]: Getting Info For DiscordUID '{userid}'")
     try:
         table = dynamodb.Table("FLCC_Users")
         response = table.get_item(
@@ -22,13 +22,16 @@ def getUserInfo(userid:str, choice=None):
         write_log(f"[{datetime.utcnow()}]: [Database Access]: {e.response['Error']['Message']}")
         return "Error"
     else:
-        item = response["Item"]
-        if choice != None and choice in item:
-            return item[str(choice)]
-        elif choice not in item:
-            return "Error"
+        if "Item" in response:
+            item = response["Item"]
+            if choice != None and choice in item:
+                return item[str(choice)]
+            elif choice != None:
+                return "Error"
+            else:
+                return item
         else:
-            return item
+            return {}
 
 def createNewUser(DiscordUID:str, DiscordUName:str, DiscordUDiscriminator:str, RobloxUID:str, RobloxUName:str):
     try:
