@@ -186,7 +186,7 @@ class RobloxAccountVerifier(commands.Cog):
             x = 0
 
             async with author.typing():
-                while check_status and x <= 15:
+                while check_status and x <= 60:
                     async with aiohttp.ClientSession() as session:
                         async with session.get(f"https://users.roblox.com/v1/users/{r_uid}/status") as response:
                             if response.status == 200:

@@ -50,10 +50,9 @@ class RankManagement(commands.Cog):
             userPerm = perms[userdata["PermID"]]
             embed = discord.Embed(
                 color = discord.Color.blue()
+                description = ""
             )
             embed.set_author(name=f"{member}", icon_url=f"{member.avatar_url}")
-            embed.add_field(name="Rank", value=f"{userRank}", inline=False)
-            embed.add_field(name="Permission Level", value=f"{userPerm}", inline=False)
             
             await ctx.send(embed=embed)
 
