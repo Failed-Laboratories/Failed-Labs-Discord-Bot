@@ -1,15 +1,7 @@
-import aiohttp
 import asyncio
 import boto3
-import decimal
 import discord
-import io
-import json
-import logging
-import math
-import os
-import psutil
-import random
+import flcc_dbhandler as fldb
 import time
 import uuid
 from boto3.dynamodb.conditions import Key, Attr
@@ -26,22 +18,11 @@ dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
 
 def check_rank(acceptable_rank:list):
     async def predicate(ctx):
-        table = dynamodb.Table("FLCC_Users")
-        try:
-            response = table.get_item(
-                Key={
-                    "DiscordUID": f"{ctx.message.author.id}"
-                }
-            )
-        except ClientError as e:
-            await write_log(f"[{datetime.utcnow()}]: [Database Access]: {e.response['Error']['Message']}")
-            return False
+        rank = fldb.getUserInfo(f"{ctx.message.author.id}", "PermID")
+        if rank in acceptable_rank:
+            return True 
         else:
-            item = response["Item"]
-            if item["PermID"] in acceptable_rank:
-                return True
-            else:
-                raise commands.MissingPermissions(acceptable_rank)
+            raise commands.MissingPermissions(acceptable_rank)
     return commands.check(predicate)
 
 async def add_log(ctx, member, action:str, reason="No Reason Given"):

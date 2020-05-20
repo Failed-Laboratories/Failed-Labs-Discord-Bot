@@ -5,7 +5,7 @@ import logging
 import os
 import set_enviro_vars as sev
 import time
-from datetime import datetime, timezone
+from datetime import datetime
 from discord.ext import commands
 
 sev.set_enviroment()

@@ -1,24 +1,14 @@
 import aiohttp
 import asyncio
-import boto3
 import flcc_dbhandler as fldb
-import decimal
 import discord
-import io
 import json
 import logging
 import math
-import os
-import psutil
 import random
 import time
-import uuid
-from boto3.dynamodb.conditions import Key, Attr
-from botocore.exceptions import ClientError
 from datetime import datetime, timezone
 from discord.ext import commands
-
-dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
 
 async def write_log(message):
     print(message)
