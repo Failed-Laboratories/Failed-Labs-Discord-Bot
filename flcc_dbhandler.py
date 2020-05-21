@@ -27,7 +27,7 @@ def getUserInfo(userid:str, choice=None):
             if choice != None and choice in item:
                 return item[str(choice)]
             elif choice != None:
-                return "Error"
+                return {}
             else:
                 return item
         else:
@@ -44,9 +44,13 @@ def createNewUser(DiscordUID:str, DiscordUName:str, DiscordUDiscriminator:str, R
                 "DiscordUID": DiscordUID,
                 "DiscordUName": DiscordUName,
                 "Kicks": "0",
-                "PermID": "L1",
+                "PermIDs": {
+                    "FL": "L1"
+                },
                 "Points": "0",
-                "RankID": "SCI",
+                "RankIDs": {
+                    "FL": "SCI"
+                },
                 "RobloxUID": RobloxUID,
                 "RobloxUName": RobloxUName,
                 "Warns": "0"

@@ -10,11 +10,13 @@ async def write_log(message):
     with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.log", "a") as f:
         f.write(message + "\n")
 
-def check_rank(acceptable_rank:list):
+def check_rank(acceptable_rank:list, perm_set="FL"):
     async def predicate(ctx):
-        rank = fldb.getUserInfo(f"{ctx.message.author.id}", "PermID")
-        if rank in acceptable_rank:
-            return True 
+        ranks = fldb.getUserInfo(f"{ctx.message.author.id}", "PermIDs")
+        if perm_set in ranks and ranks[perm_set] in acceptable_rank in acceptable_rank:
+            return True
+        elif "GBL" in ranks and ranks["GBL"] in acceptable_rank:
+            return True
         else:
             raise commands.MissingPermissions(acceptable_rank)
     return commands.check(predicate)
@@ -48,7 +50,7 @@ class Miscellaneous(commands.Cog):
         embed = discord.Embed(
             color = discord.Color.green(),
             title = "Testing",
-            description = iter*":ping_pong:"
+            description = iter*"█"
         )
         await ctx.send(embed=embed)
 

@@ -19,11 +19,13 @@ async def write_log(message):
 
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
 
-def check_rank(acceptable_rank:list):
+def check_rank(acceptable_rank:list, perm_set="FL"):
     async def predicate(ctx):
-        rank = fldb.getUserInfo(f"{ctx.message.author.id}", "PermID")
-        if rank in acceptable_rank:
-            return True 
+        ranks = fldb.getUserInfo(f"{ctx.message.author.id}", "PermIDs")
+        if perm_set in ranks and ranks[perm_set] in acceptable_rank in acceptable_rank:
+            return True
+        elif "GBL" in ranks and ranks["GBL"] in acceptable_rank:
+            return True
         else:
             raise commands.MissingPermissions(acceptable_rank)
     return commands.check(predicate)
@@ -42,13 +44,12 @@ def gen_verify_phrase():
 
         joiners = [" and ", " the ", " do ", " can ", " is ", " a "]
         concater = random.sample(joiners, 1)
-        word = random.sample(words,1)
+        word = random.sample(words, 1)
 
         new_phrase = concater[0] + word[0]
         auth_phrase += new_phrase
     
     return auth_phrase
-
 
 class RobloxAccountVerifier(commands.Cog):
 
@@ -67,31 +68,50 @@ class RobloxAccountVerifier(commands.Cog):
         table = dynamodb.Table("FLCC_Users")
         author = ctx.message.author
         do_verify = True
+        verified = False
+        r_uid = ""
+        r_uname = ""
 
         await write_log(f"[{datetime.utcnow()}]: [Verification]: Initiating verification for {ctx.message.author.name}")
 
-        try:
-            response = table.get_item(
-                Key={
-                    "DiscordUID": f"{author.id}"
-                }
-            )
-        except ClientError as e:
-            await write_log(e.response['Error']['Message'])
+        userData = fldb.getUserInfo(f"{author.id}", "RobloxUID")
+        if userData != {}:
+            await write_log(f"[{datetime.utcnow()}]: [Verification]: Verification for {ctx.message.author.name} failed: User already linked to a Roblox account.")
             do_verify = False
-        else:
-            if "Item" in response:
-                if "RobloxUID" in response["Item"]:
-                    await write_log(f"[{datetime.utcnow()}]: [Verification]: Verification for {ctx.message.author.name} failed: User already linked to a Roblox account.")
-                    do_verify = False
 
-                    embed = discord.Embed(
-                        color = discord.Color.dark_red(),
-                        title = ":warning:   Roblox Account Verification Error   :warning:",
-                        description = "You already have an account linked to your Discord profile!"
-                    )
+            embed = discord.Embed(
+                color = discord.Color.dark_red(),
+                title = ":warning:   Roblox Account Verification Error   :warning:",
+                description = "You already have an account linked to your Discord profile!"
+            )
 
-                    await ctx.send(embed=embed)
+            await ctx.send(embed=embed)
+
+        if do_verify:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f"https://api.blox.link/v1/user/{author.id}") as response:
+                    if response.status == 200:
+                        data = json.loads(await response.text())
+                        if "error" not in data:
+                            r_uid = data["primaryAccount"]
+                            async with session.get(f"https://api.roblox.com/users/{r_uid}") as response:
+                                if response.status == 200:
+                                    data = json.loads(await response.text())
+                                    r_uname = data["Username"]
+                                    do_verify = False
+                                    verified = True
+                
+
+        if do_verify:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f"https://verify.eryn.io/api/user/{author.id}") as response:
+                    if response.status == 200:
+                        data = json.loads(await response.text())
+                        if "error" not in data:
+                            r_uid = data["robloxId"]
+                            r_uname = data["robloxUsername"]
+                            do_verify = False
+                            verified = True
 
         if str(ctx.channel.type) != "private" and do_verify:
 
@@ -101,9 +121,7 @@ class RobloxAccountVerifier(commands.Cog):
                 description = f"{ctx.message.author.mention} Check your DMs!"
             )
 
-            await ctx.send(embed=embed)
-
-        data = {}
+            await ctx.send(embed=embed, delete_after=5)
 
         if do_verify:
 
@@ -134,13 +152,10 @@ class RobloxAccountVerifier(commands.Cog):
             else:
                 r_uname = msg.content
 
-                r_uid = ""
-
                 async with aiohttp.ClientSession() as session:
                     async with session.get(f"https://api.roblox.com/users/get-by-username?username={r_uname}") as response:
                         if response.status == 200:
                             data = json.loads(await response.text())
-
                             if "success" in data:
 
                                 embed = discord.Embed(
@@ -161,13 +176,6 @@ class RobloxAccountVerifier(commands.Cog):
             auth_code = gen_verify_phrase()
             await write_log(f"[{datetime.utcnow()}]: [Verification]: Verification code for {ctx.message.author.name} to {r_uname}: {auth_code}.")
 
-            embed = discord.Embed(
-                color = discord.Color.orange(),
-                title = ":globe_with_meridians:   Roblox Account Verification   :globe_with_meridians:",
-                description = f"Hello {author.mention}!\n\nYou will be verifying the following Roblox account: ```{r_uname}```\nGo to https://www.roblox.com/feeds/ and paste this code into your **status**, or you can go to https://www.roblox.com/my/account and paste this code into your **profile**: ```{auth_code}```\nDon't worry about telling me when you've finished. I'll check your status automatically and rank you if I find the code above.\n\nI will indicate to you that I am still checking your status by 'typing'. If I stop, the prompt has timed out and you will need to run the verify command again."
-            )
-            embed.set_footer(text="This prompt will expire in 60 seconds.\nFailed Labs Central Command")
-
             verify_by_status = discord.File(
                 fp = "./files/verifybystatus.png",
                 filename = "verifybystatus.png",
@@ -179,9 +187,32 @@ class RobloxAccountVerifier(commands.Cog):
                 spoiler = False
             )
 
+            embed = discord.Embed(
+                color = discord.Color.orange(),
+                title = ":globe_with_meridians:   Roblox Account Verification   :globe_with_meridians:",
+                description = f"Hello {author.mention}!\n\nYou will be verifying the following Roblox account: ```{r_uname}```\nGo to https://www.roblox.com/feeds/ and paste this code into your **status**, or you can go to https://www.roblox.com/my/account and paste this code into your **profile**:"
+            )
+
             await author.send(embed=embed, files=[verify_by_status, verify_by_profile])
 
-            verified = False
+            embed = discord.Embed(
+                color = discord.Color.orange(),
+                description = f"```{auth_code}```"
+            )
+
+            await author.send(embed=embed)
+
+            embed = discord.Embed(
+                color = discord.Color.orange(),
+                description = "Don't worry about telling me when you've finished. I'll check your status automatically and rank you if I find the code above.\n\nI will indicate to you that I am still checking your status by 'typing'. If I stop, the prompt has timed out and you will need to run the verify command again."
+            )
+
+            embed.set_footer(text="This prompt will expire in 60 seconds.\nFailed Labs Central Command")
+
+            await author.send(embed=embed)
+            
+
+            do_verify = False
             check_status = True
             x = 0
 
@@ -204,73 +235,66 @@ class RobloxAccountVerifier(commands.Cog):
                                     check_status = False
                                     verified = True
                                     break
-                    x = x + 1
-                    await asyncio.sleep(0.5)
+                                x = x + 1
+                                await asyncio.sleep(0.5)
 
-                if verified:
+        if verified:
 
-                    await write_log(f"[{datetime.utcnow()}]: [Verification]: Verification for {ctx.message.author.name} to {r_uname} successful.")
-                
-                    embed = discord.Embed(
-                        color = discord.Color.green(),
-                        title = ":white_check_mark:   Roblox Account Verification   :white_check_mark:",
-                        description = f"Verification of Roblox User `{r_uname}` to {author.mention} Successful!"
-                    )
-                    embed.set_footer(text="Failed Labs Central Command")
+            await write_log(f"[{datetime.utcnow()}]: [Verification]: Verification for {ctx.message.author.name} to {r_uname} successful.")
 
+            embed = discord.Embed(
+                color = discord.Color.green(),
+                title = ":white_check_mark:   Roblox Account Verification   :white_check_mark:",
+                description = f"Verification of Roblox User `{r_uname}` to {author.mention} Successful!"
+            )
+            embed.set_footer(text="Failed Labs Central Command")
+
+            try:
+                response = table.get_item(
+                    Key={
+                        "DiscordUID": f"{author.id}"
+                    }
+                )
+            except ClientError as e:
+                await write_log(e.response['Error']['Message'])
+            else:
+                if "Item" in response:
                     try:
-                        response = table.get_item(
+                        response = table.update_item(
                             Key={
                                 "DiscordUID": f"{author.id}"
+                            },
+                            UpdateExpression="set RobloxUID=:ruid, RobloxUName=:run",
+                            ExpressionAttributeValues={
+                                ":run": r_uname,
+                                ":ruid": str(r_uid)
                             }
                         )
                     except ClientError as e:
                         await write_log(e.response['Error']['Message'])
                     else:
-                        if "Item" in response:
-                            try:
-                                response = table.update_item(
-                                    Key={
-                                        "DiscordUID": f"{author.id}"
-                                    },
-                                    UpdateExpression="set RobloxUID=:ruid, RobloxUName=:run",
-                                    ExpressionAttributeValues={
-                                        ":run": r_uname,
-                                        ":ruid": str(r_uid)
-                                    }
-                                )
-                            except ClientError as e:
-                                await write_log(e.response['Error']['Message'])
-                            else:
-                                pass
-                        else:
-                            try:
-                                response = table.put_item(
-                                    Item={
-                                        "DiscordUID": f"{author.id}",
-                                        "DiscordUName": f"{author.name}",
-                                        "DiscordUDiscriminator": f"{author.discriminator}"  ,
-                                        "RobloxUID": str(r_uid),
-                                        "RobloxUName": r_uname
-                                    }
-                                )
-                            except ClientError as e:
-                                await write_log(e.response['Error']['Message'])
-                            else:
-                                pass
-
-                elif verified == False:
-
-                    await write_log(f"[{datetime.utcnow()}]: [Verification]: Verification for {ctx.message.author.name} to {r_uname} failed: Verification timed out.")
-
-                    embed = discord.Embed(
-                        color = discord.Color.dark_red(),
-                        title = ":x:   Roblox Account Verification   :x:",
-                        description = f"Verification of Roblox User `{r_uname}` to {author.mention} Failed.\nI couldn't find the code I gave you in your status.\n\nPlease try again or contact a staff member for more assistance."
+                        pass
+                else:
+                    fldb.createNewUser(
+                        DiscordUID = f"{author.id}",
+                        DiscordUName = f"{author.name}",
+                        DiscordUDiscriminator = f"{author.discriminator}",
+                        RobloxUID = f"{r_uid}",
+                        RobloxUName = f"{r_uname}"
                     )
-                    embed.set_footer(text="Failed Labs Central Command")
-                
-                await author.send(embed=embed)
+
+        elif verified == False and do_verify == False:
+
+            await write_log(f"[{datetime.utcnow()}]: [Verification]: Verification for {ctx.message.author.name} to {r_uname} failed: Verification timed out.")
+
+            embed = discord.Embed(
+                color = discord.Color.dark_red(),
+                title = ":x:   Roblox Account Verification   :x:",
+                description = f"Verification of Roblox User `{r_uname}` to {author.mention} Failed.\nI couldn't find the code I gave you in your status.\n\nPlease try again or contact a staff member for more assistance."
+            )
+            embed.set_footer(text="Failed Labs Central Command")
+
+        await author.send(embed=embed)
                 
 def setup(bot):
     bot.add_cog(RobloxAccountVerifier(bot))

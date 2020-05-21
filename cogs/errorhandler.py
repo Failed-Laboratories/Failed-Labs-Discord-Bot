@@ -10,15 +10,6 @@ async def write_log(message):
     with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.log", "a") as f:
         f.write(message + "\n")
 
-def check_rank(acceptable_rank:list):
-    async def predicate(ctx):
-        rank = fldb.getUserInfo(f"{ctx.message.author.id}", "PermID")
-        if rank in acceptable_rank:
-            return True 
-        else:
-            raise commands.MissingPermissions(acceptable_rank)
-    return commands.check(predicate)
-
 class ErrorHandler(commands.Cog):
 
     def __init__(self, bot):
