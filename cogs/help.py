@@ -36,10 +36,11 @@ class Help(commands.Cog):
     async def help(self, ctx):
         embed = discord.Embed(
             color = discord.Color.greyple(),
-            title = ":grey_question:   Help   :grey_question:"
+            title = "❔   Help   ❔"
         )
         embed.set_footer(text="Failed Labs Central Command")
-        embed.add_field(name="\> Developer [4] <", value="`load`, `unload`, `reload`, `shutdown`")
+        embed.add_field(name="\> Database Management [4]", value="`create`, `view`, `set`, `delete`", inline=False)
+        embed.add_field(name="\> Developer [4] <", value="`load`, `unload`, `reload`, `shutdown`", inline=False)
         embed.add_field(name="\> Moderation [3] <", value="`kick`, `ban`, `purge`", inline=False)
         embed.add_field(name="\> Miscellaneous [1] <", value="`ping`", inline=False)
         embed.add_field(name="\> Statistics [1] <", value="`stats`", inline=False)
@@ -52,7 +53,7 @@ class Help(commands.Cog):
     async def load(self, ctx):
         embed = discord.Embed(
             color = discord.Color.greyple(),
-            title = ":grey_question:   Help   :grey_question:",
+            title = "❔   Help   ❔",
             description = "Developer Commands - `load`"
         )
         embed.set_footer(text="Failed Labs Central Command")
@@ -66,7 +67,7 @@ class Help(commands.Cog):
     async def unload(self, ctx):
         embed = discord.Embed(
             color = discord.Color.greyple(),
-            title = ":grey_question:   Help   :grey_question:",
+            title = "❔   Help   ❔",
             description = "Developer Commands - `unload`"
         )
         embed.set_footer(text="Failed Labs Central Command")
@@ -80,7 +81,7 @@ class Help(commands.Cog):
     async def reload(self, ctx):
         embed = discord.Embed(
             color = discord.Color.greyple(),
-            title = ":grey_question:   Help   :grey_question:",
+            title = "❔   Help   ❔",
             description = "Developer Commands - `reload`"
         )
         embed.set_footer(text="Failed Labs Central Command")
@@ -94,7 +95,7 @@ class Help(commands.Cog):
     async def shutdown(self, ctx):
         embed = discord.Embed(
             color = discord.Color.greyple(),
-            title = ":grey_question:   Help   :grey_question:",
+            title = "❔   Help   ❔",
             description = "Developer Commands - `shutdown`"
         )
         embed.set_footer(text="Failed Labs Central Command")
@@ -109,7 +110,7 @@ class Help(commands.Cog):
     async def kick(self, ctx):
         embed = discord.Embed(
             color = discord.Color.greyple(),
-            title = ":grey_question:   Help   :grey_question:",
+            title = "❔   Help   ❔",
             description = "Moderation Commands - `kick`"
         )
         embed.set_footer(text="Failed Labs Central Command")
@@ -123,7 +124,7 @@ class Help(commands.Cog):
     async def ban(self, ctx):
         embed = discord.Embed(
             color = discord.Color.greyple(),
-            title = ":grey_question:   Help   :grey_question:",
+            title = "❔   Help   ❔",
             description = "Moderation Commands - `ban`"
         )
         embed.set_footer(text="Failed Labs Central Command")
@@ -137,7 +138,7 @@ class Help(commands.Cog):
     async def purge(self, ctx):
         embed = discord.Embed(
             color = discord.Color.greyple(),
-            title = ":grey_question:   Help   :grey_question:",
+            title = "❔   Help   ❔",
             description = "Moderation Commands - `purge`"
         )
         embed.set_footer(text="Failed Labs Central Command")
@@ -152,7 +153,7 @@ class Help(commands.Cog):
     async def ping(self, ctx):
         embed = discord.Embed(
             color = discord.Color.greyple(),
-            title = ":grey_question:   Help   :grey_question:",
+            title = "❔   Help   ❔",
             description = "Miscellaneous Commands - `ping`"
         )
         embed.set_footer(text="Failed Labs Central Command")
@@ -167,7 +168,7 @@ class Help(commands.Cog):
     async def stats(self, ctx):
         embed = discord.Embed(
             color = discord.Color.greyple(),
-            title = ":grey_question:   Help   :grey_question:",
+            title = "❔   Help   ❔",
             description = "Statistics Commands - `stats`"
         )
         embed.set_footer(text="Failed Labs Central Command")
@@ -182,13 +183,85 @@ class Help(commands.Cog):
     async def verify(self, ctx):
         embed = discord.Embed(
             color = discord.Color.greyple(),
-            title = ":grey_question:   Help   :grey_question:",
+            title = "❔   Help   ❔",
             description = "Verification Commands - `verify`"
         )
         embed.set_footer(text="Failed Labs Central Command")
         embed.add_field(name="Description", value="Verifies ownership of a Roblox account, linking it to the current Discord user.")
         embed.add_field(name="Usage", value="`verify <Roblox username>`", inline=False)
         embed.add_field(name="Required Level", value="Visitor")
+
+        await ctx.send(embed=embed)
+
+    #Database Commands
+    @help.command()
+    async def database(self, ctx):
+        embed = discord.Embed(
+            color = discord.Color.greyple(),
+            title = "❔   Help   ❔",
+            description = "Database Commands - `database`"
+        )
+        embed.set_footer(text="Failed Labs Central Command")
+        embed.add_field(name="Description", value="Shows the names of the databases the bot uses and their usage.")
+        embed.add_field(name="Usage", value="`database`", inline=False)
+        embed.add_field(name="Aliases", value="`db`")
+        embed.add_field(name="Required Level", value="Developer")
+
+        await ctx.send(embed=embed)
+
+    @help.command()
+    async def create(self, ctx):
+        embed = discord.Embed(
+            color = discord.Color.greyple(),
+            title = "❔   Help   ❔",
+            description = "Database Commands - `create`"
+        )
+        embed.set_footer(text="Failed Labs Central Command")
+        embed.add_field(name="Description", value="Creates a new document with the specified document ID and the specified values.")
+        embed.add_field(name="Usage", value="`database create <table name> <document ID> <key>:<value>, ...`", inline=False)
+        embed.add_field(name="Required Level", value="Developer")
+
+        await ctx.send(embed=embed)
+    
+    @help.command()
+    async def view(self, ctx):
+        embed = discord.Embed(
+            color = discord.Color.greyple(),
+            title = "❔   Help   ❔",
+            description = "Database Commands - `view`"
+        )
+        embed.set_footer(text="Failed Labs Central Command")
+        embed.add_field(name="Description", value="Views the specified document from the specified table.")
+        embed.add_field(name="Usage", value="`database view <table name> <document ID>`", inline=False)
+        embed.add_field(name="Required Level", value="Developer")
+
+        await ctx.send(embed=embed)
+
+    @help.command(name="set")
+    async def __set(self, ctx):
+        embed = discord.Embed(
+            color = discord.Color.greyple(),
+            title = "❔   Help   ❔",
+            description = "Database Commands - `set`"
+        )
+        embed.set_footer(text="Failed Labs Central Command")
+        embed.add_field(name="Description", value="Sets the specified key within the specified document to the specified value.")
+        embed.add_field(name="Usage", value="`database set <table name> <document ID> <key> <value>`", inline=False)
+        embed.add_field(name="Required Level", value="Developer")
+
+        await ctx.send(embed=embed)
+
+    @help.command()
+    async def delete(self, ctx):
+        embed = discord.Embed(
+            color = discord.Color.greyple(),
+            title = "❔   Help   ❔",
+            description = "Database Commands - `delete`"
+        )
+        embed.set_footer(text="Failed Labs Central Command")
+        embed.add_field(name="Description", value="Deletes the specified document from the specified table.")
+        embed.add_field(name="Usage", value="`database delete <table name> <document ID>`", inline=False)
+        embed.add_field(name="Required Level", value="Developer")
 
         await ctx.send(embed=embed)
 
@@ -200,7 +273,7 @@ class Help(commands.Cog):
 
             embed = discord.Embed(
                 color = discord.Color.blue(),
-            title = ":robot:   About Me   :robot:",
+            title = "🤖   About Me   🤖",
                 description = f"{ctx.message.author.mention} Check your DMs!"
             )
 
@@ -208,7 +281,7 @@ class Help(commands.Cog):
 
         embed = discord.Embed(
             color = discord.Color.blue(),
-            title = ":robot:   About Me   :robot:",
+            title = "🤖   About Me   🤖",
         )
         embed.add_field(
             name="Who are you?",

@@ -1,6 +1,5 @@
 import asyncio
 import discord
-import flcc_dbhandler as fldb
 import time
 from datetime import datetime, timezone
 from discord.ext import commands
@@ -27,7 +26,7 @@ class ErrorHandler(commands.Cog):
         set_footer = False
         embed = discord.Embed(
             color = discord.Color.dark_red(),
-            title = ":warning: Error :warning:"
+            title = "⚠️   Error   ⚠️"
         )
 
         if isinstance(error, commands.MissingPermissions):

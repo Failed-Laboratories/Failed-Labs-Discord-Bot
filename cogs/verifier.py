@@ -249,6 +249,11 @@ class RobloxAccountVerifier(commands.Cog):
             )
             embed.set_footer(text="Failed Labs Central Command")
 
+            await author.edit(
+                nick=f"{r_uname}",
+                reason=f"User successfully verified and linked to Roblox account with id {r_uid} and username {r_uname}"
+            )
+
             try:
                 response = table.get_item(
                     Key={
