@@ -43,12 +43,15 @@ class RankManagement(commands.Cog):
         member = ctx.message.author
         userdata = fldb.getUserInfo(f"{member.id}")
         if userdata != {} or userdata != "Error":
-            async with aiohttp.ClientSession() as session:
-                pass
-            ranks = json.load(open("./files/ranks.json"))
-            userRank = ranks[userdata["RankID"]]["Name"]
-            perms = json.load(open("./files/permissions.json"))
-            userPerm = perms[userdata["PermID"]]
+            fl_ranks = {}
+            json.load(open("./files/fl_ranks.json"))
+            fl_perms = {}
+            json.load(open("./files/fl_permissions.json"))
+            sa_ranks = {}
+            json.load(open("./files/sa_ranks.json"))
+            sa_perms = {}
+            json.load(open("./files/sa_permissions.json"))
+
             embed = discord.Embed(
                 color = discord.Color.blue(),
                 description = "hello"
