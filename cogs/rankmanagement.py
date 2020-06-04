@@ -40,24 +40,24 @@ class RankManagement(commands.Cog):
     @commands.group(name="rank", invoke_without_command=True)
     async def rank(self, ctx):
         userdata = {}
-        member = ctx.message.author
-        userdata = fldb.getUserInfo(f"{member.id}")
+        author = ctx.message.author
+        userdata = fldb.getUserInfo(f"{author.id}")
         if userdata != {} or userdata != "Error":
-            fl_ranks = {}
-            json.load(open("./files/fl_ranks.json"))
-            fl_perms = {}
-            json.load(open("./files/fl_permissions.json"))
-            sa_ranks = {}
-            json.load(open("./files/sa_ranks.json"))
-            sa_perms = {}
-            json.load(open("./files/sa_permissions.json"))
+            ranks_and_perms = json.load(open("./files/ranksandperms.json", "r"))
 
             embed = discord.Embed(
                 color = discord.Color.blue(),
                 description = "hello"
             )
-            embed.set_author(name=f"{member}", icon_url=f"{member.avatar_url}")
+            embed.set_author(name=f"{author}", icon_url=f"{author.avatar_url}")
             
+            await ctx.send(embed=embed)
+        else:
+            embed = discord.Embed(
+                color = discord.Color.dark_red()
+            )
+            embed.set_author(name=f"{author}", icon_url=f"{author.avatar_url}")
+
             await ctx.send(embed=embed)
 
 

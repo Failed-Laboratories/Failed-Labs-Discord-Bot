@@ -59,5 +59,17 @@ class Miscellaneous(commands.Cog):
         profilePic = str(ctx.message.author.avatar_url_as(static_format="jpg", size=4096))
         await ctx.send(profilePic)
 
+    @commands.command(name="print")
+    async def _toconsole(self, ctx):
+        def checkAuthor(m):
+                return m.author == ctx.message.author
+
+        try:
+            msg = await self.bot.wait_for("message", check=checkAuthor, timeout=15)
+        except asyncio.TimeoutError as e:
+            pass
+        else:
+            print(msg.content)
+
 def setup(bot):
     bot.add_cog(Miscellaneous(bot))

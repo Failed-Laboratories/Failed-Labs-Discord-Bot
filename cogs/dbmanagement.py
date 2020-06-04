@@ -112,9 +112,9 @@ class DatabaseManagement(commands.Cog):
                 await ctx.send(embed=embed)
 
     
-    @database.command()
+    @database.command(name="set")
     @check_rank(["DEV"])
-    async def set(self, ctx, database:str, id:str, key:str, *, value:str):
+    async def setRecord(self, ctx, database:str, id:str, key:str, *, value:str):
         author = ctx.message.author
         table, tableName, itemID = translate_name(database, id)
         isTable = False

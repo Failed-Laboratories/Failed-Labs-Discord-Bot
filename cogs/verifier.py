@@ -71,6 +71,7 @@ class RobloxAccountVerifier(commands.Cog):
         verified = False
         r_uid = ""
         r_uname = ""
+        bot_verifier_used = False
 
         await write_log(f"[{datetime.utcnow()}]: [Verification]: Initiating verification for {ctx.message.author.name}")
 
@@ -81,13 +82,29 @@ class RobloxAccountVerifier(commands.Cog):
 
             embed = discord.Embed(
                 color = discord.Color.dark_red(),
-                title = ":warning:   Roblox Account Verification Error   :warning:",
+                title = "⚠️   Roblox Account Verification Error   ⚠️",
                 description = "You already have an account linked to your Discord profile!"
             )
+            embed.set_footer(text="Failed Labs Central Command")
 
             await ctx.send(embed=embed)
 
+        if do_verify and str(ctx.channel.type) == "private":
+            embed = discord.Embed(
+                color = discord.Color.dark_red(),
+                title = "⚠️   Roblox Account Verification Error   ⚠️",
+                description = "Please start this command from a channel within a Failed Labs Discord Server."
+            )
+            embed.set_footer(text="Failed Labs Central Command")
+            
+            await ctx.send(embed=embed)
+            # This embed is sent in the 'await ctx.send(embed=embed)' found at the very end of this command
+            do_verify = False
+            verified = False
+            
+
         if do_verify:
+            await write_log(f"[{datetime.utcnow()}]: [Verification]: Attempting verification using Bloxlink")
             async with aiohttp.ClientSession() as session:
                 async with session.get(f"https://api.blox.link/v1/user/{author.id}") as response:
                     if response.status == 200:
@@ -103,6 +120,7 @@ class RobloxAccountVerifier(commands.Cog):
                 
 
         if do_verify:
+            await write_log(f"[{datetime.utcnow()}]: [Verification]: Attempting verification using RoVer")
             async with aiohttp.ClientSession() as session:
                 async with session.get(f"https://verify.eryn.io/api/user/{author.id}") as response:
                     if response.status == 200:
@@ -143,7 +161,7 @@ class RobloxAccountVerifier(commands.Cog):
                 await write_log(f"[{datetime.utcnow()}]: [Verification]: Verification for {ctx.message.author.name} failed: Username prompt timed out.")
                 embed = discord.Embed(
                     color = discord.Color.dark_red(),
-                    title = ":warning:   Roblox Account Verification Error   :warning:",
+                    title = "⚠️   Roblox Account Verification Error   ⚠️",
                     description = f"Prompt timed out. \nPlease try again or contact a staff member for more assistance."
                 )
                 embed.set_footer(text="Failed Labs Central Command")
@@ -160,7 +178,7 @@ class RobloxAccountVerifier(commands.Cog):
 
                                 embed = discord.Embed(
                                     color = discord.Color.dark_red(),
-                                    title = ":warning:   Roblox Account Verification Error   :warning:",
+                                    title = "⚠️   Roblox Account Verification Error   ⚠️",
                                     description = f"Roblox User `{r_uname}` Not Found. Please Try Again."
                                 )
                                 embed.set_footer(text="Failed Labs Central Command")
@@ -172,6 +190,7 @@ class RobloxAccountVerifier(commands.Cog):
                                 r_uid = data["Id"]
 
         if do_verify:
+            bot_verifier_used = True
 
             auth_code = gen_verify_phrase()
             await write_log(f"[{datetime.utcnow()}]: [Verification]: Verification code for {ctx.message.author.name} to {r_uname}: {auth_code}.")
@@ -249,10 +268,15 @@ class RobloxAccountVerifier(commands.Cog):
             )
             embed.set_footer(text="Failed Labs Central Command")
 
-            await author.edit(
-                nick=f"{r_uname}",
-                reason=f"User successfully verified and linked to Roblox account with id {r_uid} and username {r_uname}"
-            )
+            try:
+                await author.edit(
+                    nick=f"{r_uname}",
+                    reason=f"User successfully verified and linked to Roblox account with id {r_uid} and username {r_uname}"
+                )
+            except discord.Forbidden as e:
+                await write_log(f"[{datetime.utcnow()}]: [Verification]: Failed to change guild nickname of Discord User ID {author.id} to {r_uname}")
+            else:
+                pass
 
             try:
                 response = table.get_item(
@@ -287,8 +311,10 @@ class RobloxAccountVerifier(commands.Cog):
                         RobloxUID = f"{r_uid}",
                         RobloxUName = f"{r_uname}"
                     )
+                
+            await author.send(embed=embed)
 
-        elif verified == False and do_verify == False:
+        elif not verified and bot_verifier_used and not do_verify:
 
             await write_log(f"[{datetime.utcnow()}]: [Verification]: Verification for {ctx.message.author.name} to {r_uname} failed: Verification timed out.")
 
@@ -299,7 +325,7 @@ class RobloxAccountVerifier(commands.Cog):
             )
             embed.set_footer(text="Failed Labs Central Command")
 
-        await author.send(embed=embed)
-                
+            await ctx.send(embed=embed)
+
 def setup(bot):
     bot.add_cog(RobloxAccountVerifier(bot))

@@ -1,29 +1,165 @@
 {
     "Ranks": {
         "FL": {
-            "CEO": "Chief Executive Officer",
-            "COO": "Chief Operating Officer",
-            "SCI": "Scientist"
-        },
-        "SA": {
-            "EXEC": {
-                "Name": "Executive",
-                "MinPts": 100,
-                "MaxPts": 100
+            "CEO": {
+                "Name": "Chief Executive Officer",
+                "PermLvl": "EXEC"
             },
-            "TRNE": "Trainee"
+            "COO": {
+                "Name": "Chief Operating Officer",
+                "PermLvl": "EXEC"
+            },
+            "ICC": {
+                "Name": "Internal Affairs Committee Chairman",
+                "PermLvl": "EXEC"
+            },
+            "IAC": {
+                "Name": "Internal Affairs Committee",
+                "PermLvl": "IAC"
+            },
+            "BST": {
+                "Name": "Builder Supervisory Team",
+                "PermLvl": "L4"
+            },
+            "MST": {
+                "Name": "Media Supervisory Team ",
+                "PermLvl": "L4"
+            },
+            "SST": {
+                "Name": "Scientist Supervisory Team",
+                "PermLvl": "L4"
+            },
+            "SRB": {
+                "Name": "Senior Builder",
+                "PermLvl": "L3"
+            },
+            "SRM": {
+                "Name": "Senior Media Producer",
+                "PermLvl": "L3"
+            },
+            "SRS": {
+                "Name": "Senior Scientist",
+                "PermLvl": "L3"
+            },
+            "BLD": {
+                "Name": "Builder",
+                "PermLvl": "L2"
+            },
+            "MED": {
+                "Name": "Media Producer",
+                "PermLvl": "L2"
+            },
+            "SCI": {
+                "Name": "Scientist",
+                "PermLvl": "L2"
+            },
+            "TST": {
+                "Name": "Test Subject",
+                "PermLvl": "L1"
+            }
+        },
+        "SD": {
+            "OVS": {
+                "Name": "Oversight Committee",
+                "PermLvl": "OVS"
+            },
+            "DIR": {
+                "Name": "Director",
+                "PermLvl": "DIR"
+            },
+            "HIC": {
+                "Name": "High Command",
+                "PermLvl": "HIC"
+            },
+            "GEN": {
+                "Name": "General",
+                "MaxPts": 250,
+                "MinPts": 300,
+                "PermLvl": "L5"
+            },
+            "COL": {
+                "Name": "Colonel",
+                "MaxPts": 249,
+                "MinPts": 210,
+                "PermLvl": "L4"
+            },
+            "MAJ": {
+                "Name": "Major",
+                "MaxPts": 209,
+                "MinPts": 180,
+                "PermLvl": "L4"
+            },
+            "CAPT": {
+                "Name": "Captain",
+                "MaxPts": 179,
+                "MinPts": 130,
+                "PermLvl": "L3"
+            },
+            "LIEU": {
+                "Name": "Lieutenant",
+                "MaxPts": 129,
+                "MinPts": 90,
+                "PermLvl": "L3"
+            },
+            "SER": {
+                "Name": "Sergeant",
+                "MaxPts": 89,
+                "MinPts": 60,
+                "PermLvl": "L2"
+            },
+            "PRI": {
+                "Name": "Private",
+                "MaxPts": 59,
+                "MinPts": 40,
+                "PermLvl": "L2"
+            },
+            "ENL": {
+                "Name": "Enlisted",
+                "MaxPts": 39,
+                "MinPts": 20,
+                "PermLvl": "L1"
+            },
+            "TRNE": {
+                "Name": "Trainee",
+                "MaxPts": 19,
+                "MinPts": 0,
+                "PermLvl": "L1"
+            }
         }
     },
     "Permissions": {
         "FL": {
             "DEV": "Developer",
             "EXEC": "Executive",
+            "IAC": "Internal Affairs Committee",
+            "L4": "Level 4",
+            "L3": "Level 3",
+            "L2": "Level 2",
             "L1": "Level 1"
         },
-        "SA": {
+        "SD": {
             "DEV": "Developer",
-            "EXEC": "Executive",
+            "OVS": "Oversight",
+            "DIR": "Director",
+            "HIC": "High Command",
+            "L5": "Level 5",
+            "L4": "Level 4",
+            "L3": "Level 3",
+            "L2": "Level 2",
             "L1": "Level 1"
         }
+    },
+    "Progression": {
+        "SD": [
+            "TRNE",
+            "ENL",
+            "PRI",
+            "SER",
+            "LIEU",
+            "CAPT",
+            "MAJ",
+            "COL",
+            "MAJ"
+        ]
     }
 }
