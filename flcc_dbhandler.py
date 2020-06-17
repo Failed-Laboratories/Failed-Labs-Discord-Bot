@@ -21,8 +21,8 @@ def check_cache(key:str):
         return {}
 
 def write_cache(key:str, item:dict):
-    write_log(f"[{datetime.utcnow()}]: [DynamoDB Cache]: Caching '{key}' for 305 seconds.")
-    timeout = time.time() + 305
+    write_log(f"[{datetime.utcnow()}]: [DynamoDB Cache]: Caching '{key}' for 327 seconds.")
+    timeout = time.time() + 327
     dbCache[key] = item
     dbCache[key]["Timeout"] = str(timeout)
 

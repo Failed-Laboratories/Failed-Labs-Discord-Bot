@@ -53,7 +53,8 @@ async def load(ctx, extension):
     embed = discord.Embed(
         color = discord.Color.green(),
         title = ":white_check_mark:   Module Load   :white_check_mark:",
-        description = f"Loaded `{extension}` Module"
+        description = f"Loaded `{extension}` Module",
+        timestamp = datetime.utcnow()
     )
     embed.set_footer(text=f"{ctx.message.author} \nFailed Labs Central Command", icon_url=f"{ctx.message.author.avatar_url}")
     
@@ -69,7 +70,8 @@ async def unload(ctx, extension):
     embed = discord.Embed(
         color = discord.Color.red(),
         title = ":negative_squared_cross_mark:   Module Unload   :negative_squared_cross_mark:",
-        description = f"Unloaded `{extension}` Module"
+        description = f"Unloaded `{extension}` Module",
+        timestamp = datetime.utcnow()
     )
     embed.set_footer(text=f"{ctx.message.author} \nFailed Labs Central Command", icon_url=f"{ctx.message.author.avatar_url}")
     
@@ -85,7 +87,8 @@ async def reload(ctx, extension):
     embed = discord.Embed(
         color = discord.Color.green(),
         title = ":white_check_mark:   Module Reload   :white_check_mark:",
-        description = f"Reloaded `{extension}` Module"
+        description = f"Reloaded `{extension}` Module",
+        timestamp = datetime.utcnow()
     )
     embed.set_footer(text=f"{ctx.message.author} \nFailed Labs Central Command", icon_url=f"{ctx.message.author.avatar_url}")
     
@@ -103,7 +106,8 @@ async def shutdown(ctx):
         embed = discord.Embed(
             color = discord.Color.dark_red(),
             title = ":zzz:   Bot Shutdown   :zzz:",
-            description = "Shutting down..."
+            description = "Shutting down...",
+            timestamp = datetime.utcnow()
         )
         embed.set_footer(text=f"{ctx.message.author} \nFailed Labs Central Command", icon_url=f"{ctx.message.author.avatar_url}")
     

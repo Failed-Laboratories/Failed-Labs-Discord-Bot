@@ -60,6 +60,7 @@ class Miscellaneous(commands.Cog):
         await ctx.send(profilePic)
 
     @commands.command(name="print")
+    @check_rank(["DEV"])
     async def _toconsole(self, ctx):
         def checkAuthor(m):
                 return m.author == ctx.message.author
@@ -69,7 +70,17 @@ class Miscellaneous(commands.Cog):
         except asyncio.TimeoutError as e:
             pass
         else:
-            print(msg.content)
+            print(msg.attachments)
+
+    @commands.command()
+    @check_rank(["DEV"])
+    async def timeout(self,ctx):
+        await ctx.send(content="Timing out...")
+
+        time.sleep(30)
+
+        await ctx.send(content="Returning...")
+
 
 def setup(bot):
     bot.add_cog(Miscellaneous(bot))
