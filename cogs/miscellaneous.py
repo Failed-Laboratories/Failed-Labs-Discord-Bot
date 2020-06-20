@@ -59,27 +59,54 @@ class Miscellaneous(commands.Cog):
         profilePic = str(ctx.message.author.avatar_url_as(static_format="jpg", size=4096))
         await ctx.send(profilePic)
 
+    @commands.command()
+    async def guildicon(self, ctx):
+        guild_icon = str(ctx.guild.icon_url_as(static_format="jpg", size=4096))
+        if guild_icon != "":
+            await ctx.send(guild_icon)
+        else:
+            embed = discord.Embed(
+                color = discord.Color.dark_red(),
+                description = "Guild does not have an icon.",
+                timestamp = datetime.utcnow()
+            )
+            embed.set_footer(text="Failed Labs Central Command")
+            await ctx.send(embed=embed)
+
     @commands.command(name="print")
     @check_rank(["DEV"])
     async def _toconsole(self, ctx):
+
+        await ctx.message.delete()
+
         def checkAuthor(m):
                 return m.author == ctx.message.author
 
+        embed = discord.Embed(
+            color = discord.Color.orange(),
+            description = "Please send your message now.",
+            timestamp = datetime.utcnow()
+        )
+        embed.set_footer(text="This prompt will expire in 15 seconds.\nFailed Labs Central Command")
+
+        message = await ctx.send(embed=embed, delete_after=15)
+
         try:
-            msg = await self.bot.wait_for("message", check=checkAuthor, timeout=15)
+            author_message = await self.bot.wait_for("message", check=checkAuthor, timeout=15)
         except asyncio.TimeoutError as e:
             pass
         else:
-            print(msg.attachments)
+            embed = discord.Embed(
+                color = discord.Color.green(),
+                description = "Message sent to console.",
+                timestamp = datetime.utcnow()
+            )
+            embed.set_footer(text="Failed Labs Central Command")
 
-    @commands.command()
-    @check_rank(["DEV"])
-    async def timeout(self,ctx):
-        await ctx.send(content="Timing out...")
+            await message.edit(embed=embed, delete_after=5)
+            await author_message.delete()
 
-        time.sleep(30)
-
-        await ctx.send(content="Returning...")
+            print(author_message.clean_content)
 
 
 def setup(bot):

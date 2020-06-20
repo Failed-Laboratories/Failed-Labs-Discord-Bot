@@ -1,5 +1,6 @@
 import aiohttp
 import asyncio
+import boto3
 import csv
 import flcc_dbhandler as fldb
 import discord
@@ -8,6 +9,8 @@ import logging
 import math
 import random
 import time
+import uuid
+from botocore.exceptions import ClientError
 from datetime import datetime, timezone
 from discord.ext import commands
 
@@ -19,7 +22,7 @@ async def write_log(message):
 def check_rank(acceptable_rank:list, perm_set="FL"):
     async def predicate(ctx):
         ranks = fldb.getUserInfo(f"{ctx.message.author.id}", "PermIDs")
-        if perm_set in ranks and ranks[perm_set] in acceptable_rank in acceptable_rank:
+        if perm_set in ranks and ranks[perm_set] in acceptable_rank:
             return True
         elif "GBL" in ranks and ranks["GBL"] in acceptable_rank:
             return True
@@ -119,7 +122,7 @@ class RankManagement(commands.Cog):
             await ctx.send(embed=embed)
     
     @commands.group(name="setrank", invoke_without_command=True)
-    @check_rank(["DEV"])
+    @check_rank(["DEV", "EXEC"])
     async def setrank(self, ctx, user:discord.User, new_rank:str):
         embed = discord.Embed(
             color = discord.Color.blue(),
@@ -132,7 +135,7 @@ class RankManagement(commands.Cog):
         await ctx.send(embed=embed)
 
     @setrank.group(name="bulksetrank", aliases=["bulk"], invoke_without_command=True)
-    @check_rank(["DEV"])
+    @check_rank(["DEV", "EXEC"])
     async def bulksetrank(self, ctx):
 
         bulk_rank_update_example_csv = discord.File(
@@ -143,7 +146,7 @@ class RankManagement(commands.Cog):
 
         embed = discord.Embed(
             color = discord.Color.orange(),
-            title = "Bulk Rank Updater",
+            title = "🛡️   Bulk Rank Updater   🛡️",
             description = "Please use this example file to create a Comma-Seperated Values file with the Roblox usernames of people who have earned (or lost) points, followed by the ammount of points lost or gained.\n\nWhen you are finished and ready to submit this CSV file, ensure that it has a file extension of `.csv` (for example, the file name can be `bulk_rank_update.csv`), then run the command `:setrank bulk submit` to submit a bulk rank update.",
             timestamp = datetime.utcnow()
         )
@@ -153,12 +156,12 @@ class RankManagement(commands.Cog):
         await ctx.send(file=bulk_rank_update_example_csv)
     
     @bulksetrank.command(name="submit", aliasses=["submit"])
-    @check_rank(["DEV"])
+    @check_rank(["DEV", "EXEC"])
     async def bulkranksubmit(self, ctx):
         await write_log(f"[{datetime.utcnow()}]: [Rank Management]: Discord User ID '{ctx.message.author.id}' initiated bulk rank update. Awaiting file...")
         embed = discord.Embed(
             color = discord.Color.orange(),
-            title = "Bulk Rank Updater",
+            title = "🛡️   Bulk Rank Updater   🛡️",
             description = "To ensure that I properly parse and extract the data you give me, please ensure that it meets the following criteria:\n\n**1.)** The file extension of your file is `.csv`.\n\n**2.)** the *first* line of your file looks like this:\n```csv\nrobloxusername,points```\nIf your file does not meet all the criteria I described above, please edit it so that it does. Then, restart this command so I can parse your file.",
             timestamp = datetime.utcnow()
         )
@@ -188,7 +191,7 @@ class RankManagement(commands.Cog):
 
             embed = discord.Embed(
                 color = discord.Color.green(),
-                title = "Bulk Rank Updater",
+                title = "🔄   Bulk Rank Updater   🔄",
                 description = "File Received. Parsing File...",
                 timestamp = datetime.utcnow()
             )
@@ -239,7 +242,7 @@ class RankManagement(commands.Cog):
                     else:
                         embed = discord.Embed(
                             color = discord.Color.green(),
-                            title = "Bulk Rank Updater",
+                            title = "🛡️   Bulk Rank Updater   🛡️",
                             description = "Data parsing completed.\n\nIf I've done this correctly, you should see a list of usernames followed by numbers, as shown below. These correspond to the Roblox username of the user and the amount of points they've earned. Below the example data, you should see the first three data points you gave me. Please check to make sure I've parsed and extraced the data correctly.",
                             timestamp = datetime.utcnow()
                         )
@@ -289,19 +292,87 @@ class RankManagement(commands.Cog):
                             await message.clear_reactions()
                                 
                             if str(reaction.emoji) == "✅":
+
+                                request_time = datetime.utcnow()
+
                                 embed = discord.Embed(
-                                    color = discord.Color.green(),
-                                    title = "Bulk Rank Updater",
-                                    description = "Sending file to backend and queing AWS Lambda...",
+                                    color = discord.Color.orange(),
+                                    title = "🔄   Bulk Rank Updater   🔄",
+                                    description = "Uploading data to Amazon S3. Please wait...",
                                     timestamp = datetime.utcnow()
                                 )
                                 embed.set_footer(text=f"{ctx.message.author} | Failed Labs Central Command", icon_url=f"{ctx.message.author.avatar_url}")
 
+                                csv_data["Request Info"] = {
+                                    "RequesterDUID": f"{ctx.message.author.id}",
+                                    "Time": f"{request_time}",
+                                    "UUID": f"{uuid.uuid4()}"
+                                }
+
                                 await message.edit(embed=embed)
+
+                                s3 = boto3.resource("s3", region_name="us-west-2")
+                                flcc_bucket = s3.Bucket("flcc-bot")
+
+                                bulk_json_data = f"bulk-rank-request-{request_time}-{ctx.message.author.id}".replace(" ", "T").replace(":", ".")
+
+                                with open(f"./tmp/{bulk_json_data}.json", "w") as f:
+                                    f.write(json.dumps(csv_data, indent=4))
+
+                                try:
+                                    with open(f"./tmp/{bulk_json_data}.json", "rb") as data:
+                                        response = flcc_bucket.upload_fileobj(data, f"Bulk Requests/{bulk_json_data}.json")
+                                except Exception as e:
+                                    embed = discord.Embed(
+                                        color = discord.Color.dark_red(),
+                                        title = "⚠️   Bulk Rank Updater Error   ⚠️",
+                                        description = "An error occurred while uploading data to Amazon S3. Please try again. If this issue persists, contact the developer immediately.",
+                                        timestamp = datetime.utcnow()
+                                    )
+                                    embed.set_footer(text=f"Error: {e}\nFailed Labs Central Command")
+                                
+                                    await message.edit(embed=embed)
+                                else:
+                                    embed = discord.Embed(
+                                        color = discord.Color.orange(),
+                                        title = "🔄   Bulk Rank Updater   🔄",
+                                        description = "Upload to Amazon S3 successful. Handing off to AWS Lambda...",
+                                        timestamp = datetime.utcnow()
+                                    )
+                                    embed.set_footer(text=f"{ctx.message.author} | Failed Labs Central Command", icon_url=f"{ctx.message.author.avatar_url}")
+
+                                    await message.edit(embed=embed)
+
+                                    lambda_payload = {
+                                        "filename": f"{bulk_json_data}.json"
+                                    }
+
+                                    awslambda = boto3.client("lambda", region_name="us-west-2")
+
+                                    awslambda.invoke(
+                                        InvocationType="Event",
+                                        FunctionName="arn:aws:lambda:us-west-2:651915650471:function:FL-BOT-BulkRankChange",
+                                        Payload=str.encode(str(lambda_payload).replace("'", '"'))
+                                    )
+
+                                    await asyncio.sleep(1)
+
+                                    embed = discord.Embed(
+                                        color = discord.Color.green(),
+                                        title = "✅   Bulk Rank Updater   ✅",
+                                        description = "Handoff to AWS Lambda successful.\n\nYour bulk rank request is now processing. Note that it may take up to 5 minutes before processing is completed and propegated to the Failed Labs User Database, and then an additional 5 minutes before my cache is updated to reflect the new user information.",
+                                        timestamp = datetime.utcnow()
+                                    )
+                                    embed.set_footer(text=f"{ctx.message.author} | Failed Labs Central Command", icon_url=f"{ctx.message.author.avatar_url}")
+
+                                    os.remove(f"./tmp/{purge_log_filename}.json")
+
+                                    await message.edit(embed=embed)
+
                             else:
                                 embed = discord.Embed(
                                     color = discord.Color.dark_red(),
-                                    title = "Bulk Rank Updater",
+                                    title = "❌   Bulk Rank Updater   ❌",
                                     description = "Rank change cancelled. Your changes have not been submitted and no database changes will occur.",
                                     timestampe = datetime.utcnow()
                                 )

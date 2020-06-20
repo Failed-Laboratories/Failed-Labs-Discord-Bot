@@ -15,7 +15,7 @@ async def write_log(message):
 def check_rank(acceptable_rank:list, perm_set="FL"):
     async def predicate(ctx):
         ranks = fldb.getUserInfo(f"{ctx.message.author.id}", "PermIDs")
-        if perm_set in ranks and ranks[perm_set] in acceptable_rank in acceptable_rank:
+        if perm_set in ranks and ranks[perm_set] in acceptable_rank:
             return True
         elif "GBL" in ranks and ranks["GBL"] in acceptable_rank:
             return True

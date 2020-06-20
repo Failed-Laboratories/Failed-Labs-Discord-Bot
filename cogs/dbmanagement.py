@@ -18,7 +18,7 @@ async def write_log(message):
 def check_rank(acceptable_rank:list, perm_set="FL"):
     async def predicate(ctx):
         ranks = fldb.getUserInfo(f"{ctx.message.author.id}", "PermIDs")
-        if perm_set in ranks and ranks[perm_set] in acceptable_rank in acceptable_rank:
+        if perm_set in ranks and ranks[perm_set] in acceptable_rank:
             return True
         elif "GBL" in ranks and ranks["GBL"] in acceptable_rank:
             return True
@@ -62,7 +62,8 @@ class DatabaseManagement(commands.Cog):
     async def database(self, ctx):
         embed = discord.Embed(
             color = discord.Color.blue(),
-            title = "🖥️   Database Management   🖥️"
+            title = "🖥️   Database Management   🖥️",
+            timestamp = datetime.utcnow()
         )
         embed.add_field(name="FLCC_Users", value="The database containing all user information.", inline=False)
         embed.add_field(name="FLCC_Moderation_Log", value="The database containing all user moderations and moderation actions.", inline=False)
@@ -79,7 +80,8 @@ class DatabaseManagement(commands.Cog):
             embed = discord.Embed(
                 color = discord.Color.dark_red(),
                 title = "⚠️   Database Management Error   ⚠️",
-                description = "Invalid Database"
+                description = "Invalid Database",
+                timestamp = datetime.utcnow()
             )
             embed.set_footer(text="Failed Labs Central Command")
             await ctx.send(embed=embed, delete_after=5)
@@ -95,7 +97,8 @@ class DatabaseManagement(commands.Cog):
                 embed = discord.Embed(
                     color = discord.Color.dark_red(),
                     title = "🖥️   Database Management   🖥️",
-                    description = "Item Not Found"
+                    description = "Item Not Found",
+                    timestamp = datetime.utcnow()
                 )
                 embed.set_footer(text="Failed Labs Central Command")
                 await ctx.send(embed=embed)
@@ -103,7 +106,8 @@ class DatabaseManagement(commands.Cog):
                 item = response["Item"]
                 embed = discord.Embed(
                     color = discord.Color.green(),
-                    title = "🖥️   Database Management   🖥️"
+                    title = "🖥️   Database Management   🖥️",
+                    timestamp = datetime.utcnow()
                 )
                 embed.add_field(name="Table", value=f"```{tableName}```")
                 embed.add_field(name="Document ID", value=f"```{id}```")
@@ -136,7 +140,8 @@ class DatabaseManagement(commands.Cog):
             embed = discord.Embed(
                 color = discord.Color.orange(),
                 title = "🖥️   Database Management   🖥️",
-                description = ":warning:   **WARNING**   :warning:\nThe document changes you are going to make may be difficult or impossible to reverse.\n\nPlease confirm that this is correct:"
+                description = ":warning:   **WARNING**   :warning:\nThe document changes you are going to make may be difficult or impossible to reverse.\n\nPlease confirm that this is correct:",
+                timestamp = datetime.utcnow()
             )
             embed.add_field(name="Table", value=f"```{tableName}```")
             embed.add_field(name="Document ID", value=f"```{id}```")
@@ -158,21 +163,24 @@ class DatabaseManagement(commands.Cog):
                 embed = discord.Embed(
                     color = discord.Color.red(),
                     title = "🖥️   Database Management   🖥️",
-                    description = "Document Change Confirmation Timed Out"
+                    description = "Document Change Confirmation Timed Out",
+                    timestamp = datetime.utcnow()
                 )
             else:
                 if str(reaction.emoji) == "✅":
                     embed = discord.Embed(
                         color = discord.Color.green(),
                         title = "🖥️   Database Management   🖥️",
-                        description = "Document Change Successful"
+                        description = "Document Change Successful",
+                        timestamp = datetime.utcnow()
                     )
                     commitChange = True
                 else:
                     embed = discord.Embed(
                         color = discord.Color.red(),
                         title = "🖥️   Database Management   🖥️",
-                        description = "Document Change Cancelled"
+                        description = "Document Change Cancelled",
+                        timestamp = datetime.utcnow()
                     )
 
             if commitChange:
@@ -205,7 +213,8 @@ class DatabaseManagement(commands.Cog):
             embed = discord.Embed(
                 color = discord.Color.orange(),
                 title = "🖥️   Database Management   🖥️",
-                description = ":warning:   **WARNING**   :warning:\nThe document deletion you are going to make may be difficult or impossible to reverse.\n\nPlease confirm that this is correct:"
+                description = ":warning:   **WARNING**   :warning:\nThe document deletion you are going to make may be difficult or impossible to reverse.\n\nPlease confirm that this is correct:",
+                timestamp = datetime.utcnow()
             )
             embed.add_field(name="Table", value=f"```{tableName}```")
             embed.add_field(name="Document ID", value=f"```{id}```")
@@ -222,21 +231,24 @@ class DatabaseManagement(commands.Cog):
                 embed = discord.Embed(
                     color = discord.Color.red(),
                     title = "🖥️   Database Management   🖥️",
-                    description = "Document Deletion Confirmation Timed Out"
+                    description = "Document Deletion Confirmation Timed Out",
+                    timestamp = datetime.utcnow()
                 )
             else:
                 if str(reaction.emoji) == "✅":
                     embed = discord.Embed(
                         color = discord.Color.green(),
                         title = "🖥️   Database Management   🖥️",
-                        description = "Document Deletion Successful"
+                        description = "Document Deletion Successful",
+                        timestamp = datetime.utcnow()
                     )
                     commitChange = True
                 else:
                     embed = discord.Embed(
                         color = discord.Color.red(),
                         title = "🖥️   Database Management   🖥️",
-                        description = "Document Deletion Cancelled"
+                        description = "Document Deletion Cancelled",
+                        timestamp = datetime.utcnow()
                     )
 
             if commitChange:
@@ -282,21 +294,24 @@ class DatabaseManagement(commands.Cog):
             embed = discord.Embed(
                 color = discord.Color.red(),
                 title = "🖥️   Database Management   🖥️",
-                description = "Document Creation Confirmation Timed Out"
+                description = "Document Creation Confirmation Timed Out",
+                timestamp = datetime.utcnow()
             )
         else:
             if str(reaction.emoji) == "✅":
                 embed = discord.Embed(
                     color = discord.Color.green(),
                     title = "🖥️   Database Management   🖥️",
-                    description = "Document Creation Successful"
+                    description = "Document Creation Successful",
+                    timestamp = datetime.utcnow()
                 )
                 commitDocument = True
             else:
                 embed = discord.Embed(
                     color = discord.Color.red(),
                     title = "🖥️   Database Management   🖥️",
-                    description = "Document Creation Cancelled"
+                    description = "Document Creation Cancelled",
+                    timestamp = datetime.utcnow()
                 )
         
         if commitDocument:

@@ -29,7 +29,7 @@ async def write_log(message):
 def check_rank(acceptable_rank:list, perm_set="FL"):
     async def predicate(ctx):
         ranks = fldb.getUserInfo(f"{ctx.message.author.id}", "PermIDs")
-        if perm_set in ranks and ranks[perm_set] in acceptable_rank in acceptable_rank:
+        if perm_set in ranks and ranks[perm_set] in acceptable_rank:
             return True
         elif "GBL" in ranks and ranks["GBL"] in acceptable_rank:
             return True
@@ -100,7 +100,7 @@ async def reload(ctx, extension):
 @check_rank(["DEV"])
 async def shutdown(ctx):
         await write_log(f"[{ctx.message.created_at}]: [System]: {ctx.author} initiated shutdown.")
-        await write_log(f"[{ctx.message.created_at}]: [System]: Shutting down...\n")
+        await write_log(f"[{ctx.message.created_at}]: [System]: Shutting down...")
 
 
         embed = discord.Embed(
@@ -113,11 +113,19 @@ async def shutdown(ctx):
     
         await ctx.send(embed=embed)
 
+        await write_log(f"[{datetime.utcnow()}]: [System]: Deleting files in ./tmp...")
+
+        for item in os.listdir("./tmp"):
+            await write_log(f"[{datetime.utcnow()}]: [System]: Deleting './tmp/{item}'...\n")
+            os.remove(f"./tmp/{item}")
+    
+        await write_log(f"[{datetime.utcnow()}]: [System]: Logging out...\n")
+
         await bot.logout()
 
 #Cogs Loader
 for filename in os.listdir("./cogs"):
-    if filename.endswith(".py") and not filename.endswith("_lib.py"):
+    if filename.endswith(".py") and not filename.startswith("dne_"):
         bot.load_extension(f"cogs.{filename[:-3]}")
 
 
