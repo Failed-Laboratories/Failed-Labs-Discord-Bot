@@ -31,14 +31,14 @@ def translate_name(name:str, id:str):
     table = ""
     itemID = {}
     if name in ["users"]:
-        tableName = "FLCC_Users"
-        table = dynamodb.Table("FLCC_Users")
+        tableName = "Failed_Labs_Users"
+        table = dynamodb.Table("Failed_Labs_Users")
         itemID = {
             "DiscordUID": str(id)
         }
     elif name in ["moderations", "modlog", "mod log"]:
-        tableName = "FLCC_Moderation_Log"
-        table = dynamodb.Table("FLCC_Moderation_Log")
+        tableName = "Failed_Labs_Moderation_Log"
+        table = dynamodb.Table("Failed_Labs_Moderation_Log")
         itemID = {
             "InfractionID": str(id)
         }
@@ -65,8 +65,8 @@ class DatabaseManagement(commands.Cog):
             title = "🖥️   Database Management   🖥️",
             timestamp = datetime.utcnow()
         )
-        embed.add_field(name="FLCC_Users", value="The database containing all user information.", inline=False)
-        embed.add_field(name="FLCC_Moderation_Log", value="The database containing all user moderations and moderation actions.", inline=False)
+        embed.add_field(name="Failed_Labs_Users", value="The database containing all user information.", inline=False)
+        embed.add_field(name="Failed_Labs_Moderation_Log", value="The database containing all user moderations and moderation actions.", inline=False)
         embed.set_footer(text="Failed Labs Central Command")
 
         await ctx.send(embed=embed)

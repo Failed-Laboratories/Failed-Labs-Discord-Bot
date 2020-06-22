@@ -65,7 +65,7 @@ class RobloxAccountVerifier(commands.Cog):
     @commands.command()
     async def verify(self, ctx):
 
-        table = dynamodb.Table("FLCC_Users")
+        table = dynamodb.Table("Failed_Labs_Users")
         author = ctx.message.author
         do_verify = True
         verified = False

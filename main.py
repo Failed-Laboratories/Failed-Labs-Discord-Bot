@@ -40,6 +40,7 @@ def check_rank(acceptable_rank:list, perm_set="FL"):
 #Events
 @bot.event
 async def on_ready():
+    await write_log(f"[{datetime.utcnow()}]: [System]: Using AWS Profile '{os.environ['AWS_Profile']}'")
     await write_log(f"[{datetime.utcnow()}]: [System]: Using '{prefix}' as bot prefix")
     await write_log(f"[{datetime.utcnow()}]: [System]: Logged in as: {bot.user}")
     await bot.change_presence(activity=discord.Game(name=f"{prefix}help"))

@@ -2,7 +2,6 @@ import asyncio
 import discord
 import json
 import time
-from boto3 import exceptions as b3exceptions
 from datetime import datetime, timezone
 from discord.ext import commands
 

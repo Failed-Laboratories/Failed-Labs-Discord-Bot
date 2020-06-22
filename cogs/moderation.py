@@ -34,7 +34,7 @@ async def add_log(ctx, member, action:str, reason="No Reason Given"):
     infrac_time = "{:%Y-%m-%d %H:%M:%S}".format(ctx.message.created_at)
 
     try:
-        table = dynamodb.Table("FLCC_Moderation_Log")
+        table = dynamodb.Table("Failed_Labs_Moderation_Log")
         table.put_item(
             Item={
                 "InfractionID": infrac_id,
@@ -164,7 +164,7 @@ class Moderation(commands.Cog):
             await write_log(f"[{datetime.utcnow()}]: [Moderation]: Sending {purge_log_filename} purge log to Amazon S3.")
 
             s3 = boto3.resource("s3", region_name="us-west-2")
-            flcc_bucket = s3.Bucket("flcc-bot")
+            flcc_bucket = s3.Bucket("failedlabs-bot")
 
             try:
                 with open(f"./tmp/{purge_log_filename}.txt", "rb") as data:

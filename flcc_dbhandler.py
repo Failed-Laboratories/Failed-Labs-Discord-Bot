@@ -6,6 +6,8 @@ from botocore.exceptions import ClientError
 
 dynamodb = boto3.resource("dynamodb", region_name="us-west-2")
 
+users_table = "Failed_Labs_Users"
+
 dbCache = {}
 
 def write_log(message):
@@ -32,7 +34,7 @@ def getUserInfo(userid:str, choice=None):
     if userInfo == {}:
         write_log(f"[{datetime.utcnow()}]: [DynamoDB Access]: Getting Info For DiscordUID '{userid}'")
         try:
-            table = dynamodb.Table("FLCC_Users")
+            table = dynamodb.Table(users_table)
             response = table.get_item(
                 Key={
                     "DiscordUID": f"{userid}"
@@ -56,7 +58,7 @@ def getUserInfo(userid:str, choice=None):
 
 def createNewUser(DiscordUID:str, DiscordUName:str, DiscordUDiscriminator:str, RobloxUID:str, RobloxUName:str):
     try:
-        table = dynamodb.Table("FLCC_Users")
+        table = dynamodb.Table(users_table)
         table.put_item(
             Item={
                 "Awards": [],
