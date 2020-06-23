@@ -117,7 +117,7 @@ async def shutdown(ctx):
         await write_log(f"[{datetime.utcnow()}]: [System]: Deleting files in ./tmp...")
 
         for item in os.listdir("./tmp"):
-            await write_log(f"[{datetime.utcnow()}]: [System]: Deleting './tmp/{item}'...\n")
+            await write_log(f"[{datetime.utcnow()}]: [System]: Deleting './tmp/{item}'...")
             os.remove(f"./tmp/{item}")
     
         await write_log(f"[{datetime.utcnow()}]: [System]: Logging out...\n")
