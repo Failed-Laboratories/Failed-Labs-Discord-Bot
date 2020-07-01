@@ -32,7 +32,7 @@ This code is for the Failed Lababoratories (aka Failed Labs) Discord bot, known 
 
 # Service Integrations
 The bot currently uses fhe following services to function:
-- Amazon Web Services
+- [Amazon Web Services](https://aws.amazon.com/)
     - [Amazon CloudWatch](https://aws.amazon.com/cloudwatch/) - Handles logging of all commands and general command errors. The [`Discord.py`](https://discordpy.readthedocs.io/en/latest/index.html) library does not log to CloudWatch, only commands done through the bot (and similar actions).
     - [Amazon API Gateway](https://aws.amazon.com/api-gateway/) - Though not used by the bot, it provides access to the bot databases to sources incompatible with the AWS SDKs.
     - [AWS Lambda](https://aws.amazon.com/lambda/) - Handles various functions, such as bulk rank updating and updating warn and kick counts, offloading these from the bot.
