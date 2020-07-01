@@ -5,17 +5,21 @@ import discord
 import flcc_dbhandler as fldb
 import json
 import logging
+import os
 import random
 import time
 from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
 from datetime import datetime, timezone
 from discord.ext import commands
+from flcc_loghandler import CloudwatchLogger
 
-async def write_log(message):
-    print(message)
-    with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.log", "a") as f:
-        f.write(message + "\n")
+log_group = os.environ["LOGGROUP"]
+fl_logger = CloudwatchLogger(log_group)
+
+async def write_log(message:str):
+    text = fl_logger.log(message)
+    print(text)
 
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
 
@@ -59,7 +63,7 @@ class RobloxAccountVerifier(commands.Cog):
     #Events
     @commands.Cog.listener()
     async def on_ready(self):
-        await write_log(f"[{datetime.utcnow()}]: [System]: Roblox Account Verifier Cog Loaded")
+        await write_log(f"[System]: Roblox Account Verifier Cog Loaded")
 
     #Commands
     @commands.command()
@@ -73,11 +77,11 @@ class RobloxAccountVerifier(commands.Cog):
         r_uname = ""
         bot_verifier_used = False
 
-        await write_log(f"[{datetime.utcnow()}]: [Verification]: Initiating verification for {ctx.message.author.name}")
+        await write_log(f"[Verification]: Initiating verification for {ctx.message.author.name}")
 
         userData = fldb.getUserInfo(f"{author.id}", "RobloxUID")
         if userData != {}:
-            await write_log(f"[{datetime.utcnow()}]: [Verification]: Verification for {ctx.message.author.name} failed: User already linked to a Roblox account.")
+            await write_log(f"[Verification]: Verification for {ctx.message.author.name} failed: User already linked to a Roblox account.")
             do_verify = False
 
             embed = discord.Embed(
@@ -104,7 +108,7 @@ class RobloxAccountVerifier(commands.Cog):
             
 
         if do_verify:
-            await write_log(f"[{datetime.utcnow()}]: [Verification]: Attempting verification using Bloxlink")
+            await write_log(f"[Verification]: Attempting verification using Bloxlink")
             async with aiohttp.ClientSession() as session:
                 async with session.get(f"https://api.blox.link/v1/user/{author.id}") as response:
                     if response.status == 200:
@@ -120,7 +124,7 @@ class RobloxAccountVerifier(commands.Cog):
                 
 
         if do_verify:
-            await write_log(f"[{datetime.utcnow()}]: [Verification]: Attempting verification using RoVer")
+            await write_log(f"[Verification]: Attempting verification using RoVer")
             async with aiohttp.ClientSession() as session:
                 async with session.get(f"https://verify.eryn.io/api/user/{author.id}") as response:
                     if response.status == 200:
@@ -158,7 +162,7 @@ class RobloxAccountVerifier(commands.Cog):
             try:
                 msg = await self.bot.wait_for("message", check=checkAuthor, timeout=15)
             except asyncio.TimeoutError as e:
-                await write_log(f"[{datetime.utcnow()}]: [Verification]: Verification for {ctx.message.author.name} failed: Username prompt timed out.")
+                await write_log(f"[Verification]: Verification for {ctx.message.author.name} failed: Username prompt timed out.")
                 embed = discord.Embed(
                     color = discord.Color.dark_red(),
                     title = "⚠️   Roblox Account Verification Error   ⚠️",
@@ -184,7 +188,7 @@ class RobloxAccountVerifier(commands.Cog):
                                 embed.set_footer(text="Failed Labs Central Command")
 
                                 await ctx.send(embed=embed)
-                                await write_log(f"[{datetime.utcnow()}]: [Verification]: Verification for {ctx.message.author.name} failed: Unknown Roblox username.")
+                                await write_log(f"[Verification]: Verification for {ctx.message.author.name} failed: Unknown Roblox username.")
                                 do_verify = False
                             else:
                                 r_uid = data["Id"]
@@ -193,7 +197,7 @@ class RobloxAccountVerifier(commands.Cog):
             bot_verifier_used = True
 
             auth_code = gen_verify_phrase()
-            await write_log(f"[{datetime.utcnow()}]: [Verification]: Verification code for {ctx.message.author.name} to {r_uname}: {auth_code}.")
+            await write_log(f"[Verification]: Verification code for {ctx.message.author.name} to {r_uname}: {auth_code}.")
 
             verify_by_status = discord.File(
                 fp = "./files/verifybystatus.png",
@@ -259,7 +263,7 @@ class RobloxAccountVerifier(commands.Cog):
 
         if verified:
 
-            await write_log(f"[{datetime.utcnow()}]: [Verification]: Verification for {ctx.message.author.name} to {r_uname} successful.")
+            await write_log(f"[Verification]: Verification for {ctx.message.author.name} to {r_uname} successful.")
 
             embed = discord.Embed(
                 color = discord.Color.green(),
@@ -274,7 +278,7 @@ class RobloxAccountVerifier(commands.Cog):
                     reason=f"User successfully verified and linked to Roblox account with id {r_uid} and username {r_uname}"
                 )
             except discord.Forbidden as e:
-                await write_log(f"[{datetime.utcnow()}]: [Verification]: Failed to change guild nickname of Discord User ID {author.id} to {r_uname}")
+                await write_log(f"[Verification]: Failed to change guild nickname of Discord User ID {author.id} to {r_uname}")
             else:
                 pass
 
@@ -285,7 +289,7 @@ class RobloxAccountVerifier(commands.Cog):
                     }
                 )
             except ClientError as e:
-                await write_log(e.response['Error']['Message'])
+                await write_log(f"[DynamoDB Access]: {e.response['Error']['Message']}")
             else:
                 if "Item" in response:
                     try:
@@ -300,7 +304,7 @@ class RobloxAccountVerifier(commands.Cog):
                             }
                         )
                     except ClientError as e:
-                        await write_log(e.response['Error']['Message'])
+                        await write_log(f"[DynamoDB Access]: {e.response['Error']['Message']}")
                     else:
                         pass
                 else:
@@ -316,7 +320,7 @@ class RobloxAccountVerifier(commands.Cog):
 
         elif not verified and bot_verifier_used and not do_verify:
 
-            await write_log(f"[{datetime.utcnow()}]: [Verification]: Verification for {ctx.message.author.name} to {r_uname} failed: Verification timed out.")
+            await write_log(f"[Verification]: Verification for {ctx.message.author.name} to {r_uname} failed: Verification timed out.")
 
             embed = discord.Embed(
                 color = discord.Color.dark_red(),

@@ -1,14 +1,18 @@
 import asyncio
 import discord
 import flcc_dbhandler as fldb
+import os
 import time
 from datetime import datetime, timezone
 from discord.ext import commands
+from flcc_loghandler import CloudwatchLogger
 
-async def write_log(message):
-    print(message)
-    with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.log", "a") as f:
-        f.write(message + "\n")
+log_group = os.environ["LOGGROUP"]
+fl_logger = CloudwatchLogger(log_group)
+
+async def write_log(message:str):
+    text = fl_logger.log(message)
+    print(text)
 
 def check_rank(acceptable_rank:list, perm_set="FL"):
     async def predicate(ctx):
@@ -29,7 +33,7 @@ class Miscellaneous(commands.Cog):
     #events
     @commands.Cog.listener()
     async def on_ready(self):
-        await write_log(f"[{datetime.utcnow()}]: [System]: Miscellaneous Cog Loaded")
+        await write_log(f"[System]: Miscellaneous Cog Loaded")
 
     #Commands
     @commands.command()
@@ -107,6 +111,12 @@ class Miscellaneous(commands.Cog):
             await author_message.delete()
 
             print(author_message.clean_content)
+        
+    @commands.command()
+    @check_rank(["DEV"])
+    async def get_log_size(self, ctx):
+        log_size = len(fl_logger.log_cache)
+        await ctx.send(content=log_size)
 
 
 def setup(bot):

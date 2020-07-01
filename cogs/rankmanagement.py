@@ -5,17 +5,21 @@ import flcc_dbhandler as fldb
 import discord
 import json
 import logging
+import os
 import math
 import random
 import time
 import uuid
 from datetime import datetime, timezone
 from discord.ext import commands
+from flcc_loghandler import CloudwatchLogger
 
-async def write_log(message):
-    print(message)
-    with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.log", "a") as f:
-        f.write(message + "\n")
+log_group = os.environ["LOGGROUP"]
+fl_logger = CloudwatchLogger(log_group)
+
+async def write_log(message:str):
+    text = fl_logger.log(message)
+    print(text)
 
 def check_rank(acceptable_rank:list, perm_set="FL"):
     async def predicate(ctx):
@@ -36,18 +40,18 @@ class RankManagement(commands.Cog):
     #Events
     @commands.Cog.listener()
     async def on_ready(self):
-        await write_log(f"[{datetime.utcnow()}]: [System]: Rank Management Cog Loaded")
+        await write_log(f"[System]: Rank Management Cog Loaded")
 
     #Commands
     @commands.group(name="rank", invoke_without_command=True)
     async def rank(self, ctx):
         author = ctx.message.author
-        await write_log(f"[{datetime.utcnow()}]: [Rank Management]: Loading Rank Info for DiscordUID '{author.id}'")
+        await write_log(f"[Rank Management]: Loading Rank Info for DiscordUID '{author.id}'")
         user_data = fldb.getUserInfo(f"{author.id}")
         if user_data != "Error" and user_data != {}:
             ranks_and_perms = json.load(open("./files/ranksandperms.json", "r"))
 
-            await write_log(f"[{datetime.utcnow()}]: [Rank Management]: Getting Roblox Avatar Headshort for DiscordUID '{author.id}'")
+            await write_log(f"[Rank Management]: Getting Roblox Avatar Headshort for DiscordUID '{author.id}'")
             async with aiohttp.ClientSession() as session:
                 async with session.get(f"https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={user_data['RobloxUID']}&size=720x720&format=Png&isCircular=false") as response:
                     if response.status == 200:

@@ -1,16 +1,18 @@
+import set_enviro_vars as sev
+sev.set_enviroment()
+
 import asyncio
 import discord
 import flcc_dbhandler as fldb
 import logging
 import os
-import set_enviro_vars as sev
 import time
 from datetime import datetime
 from discord.ext import commands
-
-sev.set_enviroment()
+from flcc_loghandler import CloudwatchLogger
 
 prefix = os.environ["DISCORDBOTPREFIX"]
+log_group = os.environ["LOGGROUP"]
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
@@ -18,13 +20,11 @@ handler = logging.FileHandler(filename=f'./logs/discord-{datetime.date(datetime.
 handler.setFormatter(logging.Formatter('[%(asctime)s]: [%(levelname)s]: [%(name)s]: %(message)s'))
 logger.addHandler(handler)
 
+fl_logger = CloudwatchLogger(log_group)
+write_log = fl_logger.log
+
 bot = commands.Bot(command_prefix=prefix)
 bot.remove_command("help")
-
-async def write_log(message):
-    print(message)
-    with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.log", "a") as f:
-        f.write(message + "\n")
 
 def check_rank(acceptable_rank:list, perm_set="FL"):
     async def predicate(ctx):
@@ -40,9 +40,9 @@ def check_rank(acceptable_rank:list, perm_set="FL"):
 #Events
 @bot.event
 async def on_ready():
-    await write_log(f"[{datetime.utcnow()}]: [System]: Using AWS Profile '{os.environ['AWS_Profile']}'")
-    await write_log(f"[{datetime.utcnow()}]: [System]: Using '{prefix}' as bot prefix")
-    await write_log(f"[{datetime.utcnow()}]: [System]: Logged in as: {bot.user}")
+    print(write_log(f"[System]: Using AWS Profile '{os.environ['AWS_Profile']}'"))
+    print(write_log(f"[System]: Using '{prefix}' as bot prefix"))
+    print(write_log(f"[System]: Logged in as: {bot.user}"))
     await bot.change_presence(activity=discord.Game(name=f"{prefix}help"))
 
 #Commands
@@ -61,7 +61,7 @@ async def load(ctx, extension):
     
     await ctx.send(embed=embed)
 
-    await write_log(f"[{ctx.message.created_at}]: [System]: Loaded Cog: {extension}")
+    print(write_log(f"[System]: Loaded Cog: {extension}"))
 
 @bot.command()
 @check_rank(["DEV"])
@@ -78,7 +78,7 @@ async def unload(ctx, extension):
     
     await ctx.send(embed=embed)
 
-    await write_log(f"[{ctx.message.created_at}]: [System]: Unloaded Cog: {extension}")
+    print(write_log(f"[System]: Unloaded Cog: {extension}"))
 
 @bot.command()
 @check_rank(["DEV"])
@@ -95,13 +95,13 @@ async def reload(ctx, extension):
     
     await ctx.send(embed=embed)
 
-    await write_log(f"[{ctx.message.created_at}]: [System]: Reloaded Cog: {extension}")
+    print(write_log(f"[System]: Reloaded Cog: {extension}"))
 
 @bot.command()
 @check_rank(["DEV"])
 async def shutdown(ctx):
-        await write_log(f"[{ctx.message.created_at}]: [System]: {ctx.author} initiated shutdown.")
-        await write_log(f"[{ctx.message.created_at}]: [System]: Shutting down...")
+        print(write_log(f"[System]: {ctx.author} initiated shutdown."))
+        print(write_log(f"[System]: Shutting down..."))
 
 
         embed = discord.Embed(
@@ -114,15 +114,23 @@ async def shutdown(ctx):
     
         await ctx.send(embed=embed)
 
-        await write_log(f"[{datetime.utcnow()}]: [System]: Deleting files in ./tmp...")
+        print(write_log(f"[System]: Deleting files in ./tmp..."))
 
         for item in os.listdir("./tmp"):
-            await write_log(f"[{datetime.utcnow()}]: [System]: Deleting './tmp/{item}'...")
+            print(write_log(f"[{datetime.utcnow()}]: [System]: Deleting './tmp/{item}'..."))
             os.remove(f"./tmp/{item}")
     
-        await write_log(f"[{datetime.utcnow()}]: [System]: Logging out...\n")
+        print(write_log(f"[System]: Logging out..."))
+        print(write_log(f"[System]: Sending logs to Cloudwatch..."))
+        fl_logger.send_to_cloudwatch()
 
         await bot.logout()
+
+@bot.command()
+async def send_logs(ctx):
+    await ctx.send(content="Sending logs to Cloudwatch")
+    print(write_log(f"[System]: Sending logs to CloudWatch..."))
+    fl_logger.send_to_cloudwatch()
 
 #Cogs Loader
 for filename in os.listdir("./cogs"):

@@ -3,17 +3,21 @@ import boto3
 import discord
 import flcc_dbhandler as fldb
 import json
+import os
 from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
 from datetime import datetime
 from discord.ext import commands
+from flcc_loghandler import CloudwatchLogger
 
 dynamodb = boto3.resource("dynamodb", region_name="us-west-2")
 
-async def write_log(message):
-    print(message)
-    with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.log", "a") as f:
-        f.write(message + "\n")
+log_group = os.environ["LOGGROUP"]
+fl_logger = CloudwatchLogger(log_group)
+
+async def write_log(message:str):
+    text = fl_logger.log(message)
+    print(text)
 
 def check_rank(acceptable_rank:list, perm_set="FL"):
     async def predicate(ctx):
@@ -44,8 +48,6 @@ def translate_name(name:str, id:str):
         }
     return table, tableName, itemID
     
-    
-
 class DatabaseManagement(commands.Cog):
 
     def __init__(self, bot):
@@ -54,7 +56,7 @@ class DatabaseManagement(commands.Cog):
     #Events
     @commands.Cog.listener()
     async def on_ready(self):
-        await write_log(f"[{datetime.utcnow()}]: [System]: Database Management Cog Loaded")
+        await write_log(f"[System]: Database Management Cog Loaded")
 
     #Commands
     @commands.group(name="database", invoke_without_command=True, aliases=["db"])
@@ -91,7 +93,7 @@ class DatabaseManagement(commands.Cog):
                 Key=itemID
             )
         except ClientError as e:
-            write_log(f"[{datetime.utcnow()}]: [DynamoDB Access]: {e.response['Error']['Message']}")
+            write_log(f"[DynamoDB Access]: {e.response['Error']['Message']}")
         else:
             if "Item" not in response:
                 embed = discord.Embed(
@@ -193,7 +195,7 @@ class DatabaseManagement(commands.Cog):
                         }
                     )
                 except ClientError as e:
-                    write_log(f"[{datetime.utcnow()}]: [DynamoDB Access]: {e.response['Error']['Message']}")
+                    write_log(f"[DynamoDB Access]: {e.response['Error']['Message']}")
                 else:
                     pass
 
@@ -257,7 +259,7 @@ class DatabaseManagement(commands.Cog):
                         Key = itemID
                     )
                 except ClientError as e:
-                    write_log(f"[{datetime.utcnow()}]: [DynamoDB Access]: {e.response['Error']['Message']}")
+                    write_log(f"[DynamoDB Access]: {e.response['Error']['Message']}")
                 else:
                     pass
 
@@ -321,7 +323,7 @@ class DatabaseManagement(commands.Cog):
                     Item=item
                 )
             except ClientError as e:
-                    write_log(f"[{datetime.utcnow()}]: [DynamoDB Access]: {e.response['Error']['Message']}")
+                    write_log(f"[DynamoDB Access]: {e.response['Error']['Message']}")
             else:
                 pass
         

@@ -1,16 +1,20 @@
 import discord
 import flcc_dbhandler as fldb
 import logging
+import os
 import math
 import psutil
 import time
 from datetime import datetime, timezone
 from discord.ext import commands
+from flcc_loghandler import CloudwatchLogger
 
-async def write_log(message):
-    print(message)
-    with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.log", "a") as f:
-        f.write(message + "\n")
+log_group = os.environ["LOGGROUP"]
+fl_logger = CloudwatchLogger(log_group)
+
+async def write_log(message:str):
+    text = fl_logger.log(message)
+    print(text)
 
 def check_rank(acceptable_rank:list, perm_set="FL"):
     async def predicate(ctx):
@@ -35,7 +39,7 @@ class Statistics(commands.Cog):
     #events
     @commands.Cog.listener()
     async def on_ready(self):
-        await write_log(f"[{datetime.utcnow()}]: [System]: Statistics Cog Loaded")
+        await write_log(f"[System]: Statistics Cog Loaded")
 
     
     #commands

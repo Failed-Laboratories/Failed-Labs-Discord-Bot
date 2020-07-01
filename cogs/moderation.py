@@ -9,11 +9,14 @@ from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
 from datetime import datetime, timezone
 from discord.ext import commands
+from flcc_loghandler import CloudwatchLogger
 
-async def write_log(message):
-    print(message)
-    with open(f"./logs/cmds-{datetime.date(datetime.utcnow())}.log", "a") as f:
-        f.write(message + "\n")
+log_group = os.environ["LOGGROUP"]
+fl_logger = CloudwatchLogger(log_group)
+
+async def write_log(message:str):
+    text = fl_logger.log(message)
+    print(text)
 
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
 
@@ -46,11 +49,10 @@ async def add_log(ctx, member, action:str, reason="No Reason Given"):
             }
         )
     except ClientError as e:
-        await write_log(e.response['Error']['Message'])
+        await write_log(f"[DynamoDB Access]: {e.response['Error']['Message']}")
         return None, None, None
     else:
         return True, infrac_id, infrac_time
-
 
 class Moderation(commands.Cog):
 
@@ -60,7 +62,7 @@ class Moderation(commands.Cog):
     #Events
     @commands.Cog.listener()
     async def on_ready(self):
-        await write_log(f"[{datetime.utcnow()}]: [System]: Moderation Cog Loaded")
+        await write_log(f"[System]: Moderation Cog Loaded")
 
     #Commands
     @commands.command()
@@ -80,7 +82,7 @@ class Moderation(commands.Cog):
             embed.set_footer(text=f"{ctx.message.author} \nFailed Labs Central Command", icon_url=f"{ctx.message.author.avatar_url}")
 
             await ctx.send(embed=embed)
-            await write_log(f"[{ctx.message.created_at}]: [Moderation]: {ctx.message.author} warned {member} for {reason}")
+            await write_log(f"[Moderation]: {ctx.message.author} warned {member} for {reason}")
 
     @commands.command()
     @check_rank(["DEV", "ADMIN", "MOD"])
@@ -101,12 +103,18 @@ class Moderation(commands.Cog):
             #await member.kick(reason=reason)
 
             await ctx.send(embed=embed)
-            await write_log(f"[{ctx.message.created_at}]: [Moderation]: {ctx.message.author} kicked {member} for {reason}")
+            await write_log(f"[Moderation]: {ctx.message.author} kicked {member} for {reason}")
         
 
     @commands.command()
     @check_rank(["DEV", "ADMIN"])
     async def ban(self, ctx, member: discord.Member, *, reason="No Reason Given"):
+
+        # executer_info = fldb.getUserInfo(f"{ctx.message.author.id}")
+        # member_info = fldb.getUserInfo(f"{member.id}")
+
+        
+
         success, infrac_id, infrac_time = await add_log(ctx, member, "Ban", reason)
 
         if success:
@@ -123,7 +131,7 @@ class Moderation(commands.Cog):
             #await member.ban(reason=reason)
 
             await ctx.send(embed=embed)
-            await write_log(f"[{ctx.message.created_at}]: [Moderation]: {ctx.message.author} banned {member} for {reason}")
+            await write_log(f"[Moderation]: {ctx.message.author} banned {member} for {reason}")
 
     @commands.command()
     @check_rank(["DEV", "ADMIN", "MOD"])
@@ -137,7 +145,7 @@ class Moderation(commands.Cog):
             embed.set_footer(text=f"{ctx.message.author} \nFailed Labs Central Command", icon_url=f"{ctx.message.author.avatar_url}")
             
             await ctx.send(embed=embed)
-            await write_log(f"[{ctx.message.created_at}]: [Moderation]: Purging {amount} messages from {ctx.channel}")
+            await write_log(f"[Moderation]: Purging {amount} messages from {ctx.channel}")
             await asyncio.sleep(1)
 
             deleted_messages = await ctx.channel.purge(limit=amount+2)
@@ -153,15 +161,15 @@ class Moderation(commands.Cog):
 
             await ctx.send(embed=embed, delete_after=10)
 
-            await write_log(f"[{ctx.message.created_at}]: [Moderation]: {ctx.message.author} purged {amount} messages from {ctx.channel}")
+            await write_log(f"[Moderation]: {ctx.message.author} purged {amount} messages from {ctx.channel}")
 
-            await write_log(f"[{datetime.utcnow()}]: [Moderation]: Writing {purge_log_filename} purge log.")
+            await write_log(f"[Moderation]: Writing {purge_log_filename} purge log.")
 
             with open(f"./tmp/{purge_log_filename}.txt", "w") as f:
                 for message in deleted_messages:
                     f.write(f"[{message.created_at}]: [{message.author.name}#{message.author.discriminator} ({message.author.id})]: {message.clean_content}\n")
 
-            await write_log(f"[{datetime.utcnow()}]: [Moderation]: Sending {purge_log_filename} purge log to Amazon S3.")
+            await write_log(f"[S3 Access]: Sending {purge_log_filename} purge log to Amazon S3.")
 
             s3 = boto3.resource("s3", region_name="us-west-2")
             flcc_bucket = s3.Bucket("failedlabs-bot")
@@ -170,11 +178,11 @@ class Moderation(commands.Cog):
                 with open(f"./tmp/{purge_log_filename}.txt", "rb") as data:
                     flcc_bucket.upload_fileobj(data, f"Purge Logs/{purge_log_filename}.txt")
             except Exception as e:
-                await write_log(f"[{datetime.utcnow()}]: [S3 Access]: Upload Failed: {e}")
+                await write_log(f"[S3 Access]: Upload Failed: {e}")
             else:
-                await write_log(f"[{datetime.utcnow()}]: [S3 Access]: Upload Successful")
+                await write_log(f"[S3 Access]: Upload Successful")
 
-            await write_log(f"[{datetime.utcnow()}]: [Moderation]: Deleting {purge_log_filename} purge log.")
+            await write_log(f"[Moderation]: Deleting {purge_log_filename} purge log.")
 
             os.remove(f"./tmp/{purge_log_filename}.txt")
 

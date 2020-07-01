@@ -33,11 +33,12 @@ This code is for the Failed Lababoratories (aka Failed Labs) Discord bot, known 
 # Service Integrations
 The bot currently uses fhe following services to function:
 - Amazon Web Services
-    - API Gateway - Though not used by the bot, it provides access to the bot databases to sources incompatible with the AWS SDKs.
+    - Amazon CloudWatch - Handles logging of all commands and general command errors. The `Discord.py` library does not log to CloudWatch, only commands done through the bot (and similar actions).
+    - Amazon API Gateway - Though not used by the bot, it provides access to the bot databases to sources incompatible with the AWS SDKs.
     - AWS Lambda - Handles various functions, such as bulk rank updating and updating warn and kick counts, offloading these from the bot.
-    - DynamoDB - Handles the primary databases for the both, including the moderation log and user databases.
-    - Simple Storage Service - Bulk rank update and message purge log storage, as well as backup storage for essential assets (most things found in the `files` folder).
+    - Amazon DynamoDB - Handles the primary databases for the both, including the moderation log and user databases.
+    - Amazon S3 (Simple Storage Service) - Bulk rank update and message purge log storage, as well as backup storage for essential assets (most things found in the `files` folder). Also stores backups of command logs in Amazon CloudWatch.
 
 # Dependencies
-- AWS Boto3 SDK - Integration and access to AWS services.
-- Discord.py - Python wrapper for the Discord API.
+- `AWS Boto3 SDK` - Integration and access to AWS services.
+- `Discord.py` - Python wrapper for the Discord API.
