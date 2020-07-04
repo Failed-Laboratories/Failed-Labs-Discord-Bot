@@ -55,7 +55,7 @@ class CloudwatchLogger():
 
     def __generate_log_stream_name(self):
         """Accepts no parameters. Generates and returns a log stream name
-        based on the current date in UTC."""
+        based on the device's current date."""
         current_date = datetime.now()
         current_date_friendly = current_date.strftime("%Y-%m-%d")
         log_stream_name = "cmds-" + current_date_friendly

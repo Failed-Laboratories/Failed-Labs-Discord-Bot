@@ -117,20 +117,14 @@ async def shutdown(ctx):
         print(write_log(f"[System]: Deleting files in ./tmp..."))
 
         for item in os.listdir("./tmp"):
-            print(write_log(f"[{datetime.utcnow()}]: [System]: Deleting './tmp/{item}'..."))
+            print(write_log(f"[System]: Deleting './tmp/{item}'..."))
             os.remove(f"./tmp/{item}")
     
         print(write_log(f"[System]: Logging out..."))
         print(write_log(f"[System]: Sending logs to Cloudwatch..."))
-        fl_logger.send_to_cloudwatch()
+        #fl_logger.send_to_cloudwatch()
 
         await bot.logout()
-
-@bot.command()
-async def send_logs(ctx):
-    await ctx.send(content="Sending logs to Cloudwatch")
-    print(write_log(f"[System]: Sending logs to CloudWatch..."))
-    fl_logger.send_to_cloudwatch()
 
 #Cogs Loader
 for filename in os.listdir("./cogs"):

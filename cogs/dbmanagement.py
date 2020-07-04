@@ -93,7 +93,7 @@ class DatabaseManagement(commands.Cog):
                 Key=itemID
             )
         except ClientError as e:
-            write_log(f"[DynamoDB Access]: {e.response['Error']['Message']}")
+            await write_log(f"[DynamoDB Access]: {e.response['Error']['Message']}")
         else:
             if "Item" not in response:
                 embed = discord.Embed(
@@ -195,7 +195,7 @@ class DatabaseManagement(commands.Cog):
                         }
                     )
                 except ClientError as e:
-                    write_log(f"[DynamoDB Access]: {e.response['Error']['Message']}")
+                    await write_log(f"[DynamoDB Access]: {e.response['Error']['Message']}")
                 else:
                     pass
 
@@ -259,7 +259,7 @@ class DatabaseManagement(commands.Cog):
                         Key = itemID
                     )
                 except ClientError as e:
-                    write_log(f"[DynamoDB Access]: {e.response['Error']['Message']}")
+                    await write_log(f"[DynamoDB Access]: {e.response['Error']['Message']}")
                 else:
                     pass
 
@@ -323,7 +323,7 @@ class DatabaseManagement(commands.Cog):
                     Item=item
                 )
             except ClientError as e:
-                    write_log(f"[DynamoDB Access]: {e.response['Error']['Message']}")
+                    await write_log(f"[DynamoDB Access]: {e.response['Error']['Message']}")
             else:
                 pass
         
