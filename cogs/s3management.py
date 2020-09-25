@@ -169,8 +169,6 @@ class S3Management(commands.Cog):
                         timestamp = datetime.utcnow()
                     )
                     embed.set_footer(text="Failed Labs Central Command")
-
-                    await message.edit(embed=embed)
                 else:
                     embed = discord.Embed(
                         color=discord.Color.green(),
@@ -179,10 +177,10 @@ class S3Management(commands.Cog):
                         timestamp=datetime.utcnow()
                     )
                     embed.set_footer(text=f"{ctx.message.author}\nFailed Labs Central Command", icon_url=f"{ctx.message.author.avatar_url}")
-
+                finally:
                     await message.edit(embed=embed)
-        
 
+        os.remove(f"{temp_filename}")
 
 def setup(bot):
     bot.add_cog(S3Management(bot))
